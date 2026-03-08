@@ -29,6 +29,9 @@ class GroupSchema(ParentSchemaConfig):
         default=date.today()
     )
 
+    serviceAccount_id: int = Field(description="Внешний ключ для связи с сервисным аккаунтом")
+    platform_id: int = Field(description="Внешний ключ для связи с записью платформы")
+
 
 class AbsoluteStatsSchema(ParentSchemaConfig):
     id: int = Field(
@@ -67,6 +70,8 @@ class AbsoluteStatsSchema(ParentSchemaConfig):
         default=datetime.now()
     )
 
+    group_id: int = Field(description="Внешний ключ для связи с группой")
+
 
 class SnapshotSchema(ParentSchemaConfig):
     id: int = Field(
@@ -88,6 +93,8 @@ class SnapshotSchema(ParentSchemaConfig):
         alias="snapshot_type",
         description="Тип снимка состояния"
     )
+
+    group_id: int = Field(description="Внешний ключ для связи с группой")
 
 
 class SnapshotStatsSchema(ParentSchemaConfig):
@@ -120,6 +127,8 @@ class SnapshotStatsSchema(ParentSchemaConfig):
         description="Охваты"
     )
 
+    snapshot_id: int = Field(description="Внешний ключ для связи с записью снапшота")
+
 
 class ReportSchema(ParentSchemaConfig):
     id: int = Field(
@@ -146,6 +155,8 @@ class ReportSchema(ParentSchemaConfig):
         alias="reportSchema_filetype",
         description="Тип отчета"
     )
+
+    group_id: int = Field(description="Внешний ключ для связи с группой")
 
     """
     подумать над тем возможно ли разовое создание нескольких типов отчетов - если да, сделать аннотацию списком и валидацию
@@ -187,6 +198,8 @@ class ServiceAccount(ParentSchemaConfig):
         description="Имя сервисного аккаунта на платформе"
     )
 
+    platform_id: int = Field(description="Внешний ключ для связи с платформой")
+
 
 class ServiceAccountDataSchema(ParentSchemaConfig):
     id: int = Field(
@@ -210,3 +223,5 @@ class ServiceAccountDataSchema(ParentSchemaConfig):
         description="Номер телефона аккаунта ТГ",
         pattern=r"^\+7\(\d{3}\)\s\d{3}-\d{2}-\d{2}$"
     )
+
+    serviceAccount_id: int = Field(description="Внешний ключ для связи с данными сервисного аккаунта")
