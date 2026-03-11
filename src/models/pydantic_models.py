@@ -58,6 +58,11 @@ class AbsoluteStatsSchema(ParentSchemaConfig):
         description="Общее количество репостов",
         ge=0
     )
+    comms_count: int = Field(
+        alias="absoluteStats_commsCount",
+        description="Общее количество комментариев",
+        ge=0
+    )
     # необходимо ли?
     coverage: int = Field(
         alias="absoluteStats_coverage",
@@ -125,6 +130,11 @@ class SnapshotStatsSchema(ParentSchemaConfig):
     coverage: int = Field(
         alias="snapshotStats_coverage",
         description="Охваты"
+    )
+    comms_count: int = Field(
+        alias="absoluteStats_commsCount",
+        description="Общее количество комментариев",
+        ge=0
     )
 
     snapshot_id: int = Field(description="Внешний ключ для связи с записью снапшота")

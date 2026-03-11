@@ -1,6 +1,15 @@
+from src.core import create_tables, Session
+
+import asyncio
+
+from src.models import GroupModel
+from src.repositories import GroupsRepository
+
+
 def main():
-    print("Hello from vkr-sandbox!")
+    with Session() as session:
+        repo = GroupsRepository(session)
 
 
-if __name__ == "__main__":
-    main()
+
+main()
