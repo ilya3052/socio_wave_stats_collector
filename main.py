@@ -9,6 +9,7 @@ from src.repositories import GroupsRepository
 def main():
     with Session() as session:
         repo = GroupsRepository(session)
+        print(repo.get_all())
 
 
 

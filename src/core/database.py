@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 from src.models.sqlalchemy_models import Base
 
-load_dotenv()
+load_dotenv('src/cfg/.env')
 
 DB_USER = os.getenv('DB_USER')
 DB_PASS = os.getenv('DB_PASS')

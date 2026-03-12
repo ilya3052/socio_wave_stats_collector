@@ -37,6 +37,17 @@ class Base(DeclarativeBase):
         str_512: String(512)
     }
 
+    repr_cols_num = 3
+    repr_columns = ()
+
+    def __repr__(self):
+        cols = []
+        for idx, col in enumerate(self.__table__.columns.keys()):
+            if col in self.repr_columns or idx < self.repr_cols_num:
+                cols.append(f"{col} = {getattr(self, col)}")
+
+        return f"<{self.__class__.__name__} {', '.join(cols)}>"
+
 
 class GroupModel(Base):
     __tablename__ = "groups"
