@@ -1,9 +1,9 @@
 from datetime import datetime
 from enum import IntEnum, StrEnum
-from typing import Annotated, Optional
+from typing import Annotated, Optional, List
 
 from sqlalchemy import String, text, ForeignKey
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 int_pk = Annotated[int, mapped_column(primary_key=True)]
 
@@ -57,6 +57,12 @@ class GroupModel(Base):
     added_at: Mapped[created_at]
     serviceAccount_id: Mapped[int] = ForeignKey("serviceAccounts.id", ondelete='SET NULL')
     platform_id: Mapped[int] = ForeignKey("platforms.id", ondelete="CASCADE")
+    platform: Mapped['PlatformModel'] = relationship(back_populates='groups')
+
+    stats: Mapped['AbsoluteStatsModel'] = relationship(
+        uselist=False,
+        back_populates='group'
+    )
 
 
 class AbsoluteStatsModel(Base):
@@ -69,6 +75,9 @@ class AbsoluteStatsModel(Base):
     coverage: Mapped[int]
     last_updated_at: Mapped[updated_at]
     group_id: Mapped[int] = ForeignKey("groups.id", ondelete='CASCADE')
+    group: Mapped['GroupModel'] = relationship(
+        back_populates='stats'
+    )
 
 
 class SnapshotModel(Base):
@@ -78,6 +87,11 @@ class SnapshotModel(Base):
     timestamp: Mapped[created_at]
     type: Mapped[SnapshotType]
     group_id: Mapped[int] = ForeignKey("groups.id", ondelete='CASCADE')
+    stats: Mapped['SnapshotStatsModel'] = relationship(
+        back_populates='snapshot'
+    )
+
+
 
 
 class SnapshotStatsModel(Base):
@@ -90,6 +104,10 @@ class SnapshotStatsModel(Base):
     comms_count: Mapped[int]
     coverage: Mapped[int]
     snapshot_id: Mapped[int] = ForeignKey("snapshots.id", ondelete="CASCADE")
+    snapshot: Mapped['SnapshotModel'] = relationship(
+        uselist=False,
+        back_populates='stats'
+    )
 
 
 class ReportModel(Base):
@@ -108,12 +126,18 @@ class PlatformModel(Base):
 
     name: Mapped[str_128]
 
+    groups: Mapped[list['GroupModel']] = relationship(back_populates='platform')
+
 
 class ServiceAccountModel(Base):
     __tablename__ = "serviceAccounts"
     link: Mapped[str_256]
     name: Mapped[str_128]
     platform_id: Mapped[int] = ForeignKey("platforms.id", ondelete="CASCADE")
+    data: Mapped['ServiceAccountDataModel'] = relationship(
+        uselist=False,
+        back_populates='serviceAccount'
+    )
 
 
 class ServiceAccountDataModel(Base):
@@ -124,3 +148,4 @@ class ServiceAccountDataModel(Base):
     phone_number: Mapped[Optional[str_16]]
 
     serviceAccount_id: Mapped[int] = ForeignKey("serviceAccounts.id", ondelete='CASCADE')
+    serviceAccount: Mapped['ServiceAccountModel'] = relationship(back_populates='data')
