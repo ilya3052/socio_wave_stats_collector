@@ -1,0 +1,2 @@
+class LastPostException(BaseException):
+    pass

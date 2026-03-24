@@ -1,0 +1,1 @@
+from .VKStat import VKStat
