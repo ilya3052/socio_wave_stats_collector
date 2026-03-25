@@ -2,7 +2,7 @@ from typing import Optional
 
 from vk_api.vk_api import VkApiMethod, VkApi
 
-from core.config import SERVICE_KEY
+from .config import SERVICE_KEY
 
 
 def get_vk_api_session():

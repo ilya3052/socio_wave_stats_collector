@@ -16,9 +16,11 @@ DB_NAME = os.getenv('DB_NAME')
 
 DB_URL = f"postgresql+psycopg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
+# DB_URL = "sqlite:///src/db/example.db"
 engine = create_engine(
     url=DB_URL,
-    echo=True,
+    # echo=True,
+    isolation_level='SERIALIZABLE'
 )
 
 Session = sessionmaker(engine)
