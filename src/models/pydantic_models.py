@@ -3,15 +3,21 @@ from typing import Optional, Literal
 
 from pydantic import BaseModel, Field, ConfigDict
 
+from src.core.config import SnapshotType
+
 
 class ParentSchemaConfig(BaseModel):
-    model_config = ConfigDict(from_attributes=True, extra='forbid')
+    model_config = ConfigDict(from_attributes=True, extra='forbid', populate_by_name=True)
 
 
 class GroupSchema(ParentSchemaConfig):
     id: int = Field(
         alias="group_id",
-        description="Уникальный id группы"
+        description="Уникальный ID группы в системе"
+    )
+    external_id: int = Field(
+        alias='group_externalID',
+        description='ID группы на платформе'
     )
     name: str = Field(
         alias="group_name",
@@ -33,11 +39,7 @@ class GroupSchema(ParentSchemaConfig):
     platform_id: int = Field(description="Внешний ключ для связи с записью платформы")
 
 
-class AbsoluteStatsSchema(ParentSchemaConfig):
-    id: int = Field(
-        alias="absoluteStats_id",
-        description="Уникальный ID записи"
-    )
+class AbsoluteStatsSchemaBase(ParentSchemaConfig):
     likes_count: int = Field(
         alias="absoluteStats_likesCount",
         description="Общее количество лайков",
@@ -63,11 +65,7 @@ class AbsoluteStatsSchema(ParentSchemaConfig):
         description="Общее количество комментариев",
         ge=0
     )
-    # необходимо ли?
-    coverage: int = Field(
-        alias="absoluteStats_coverage",
-        description="Охваты"
-    )
+
     last_updated_at: datetime = Field(
         alias="absoluteStats_lastUpdatedAt",
         description="Время последнего обновления",
@@ -77,12 +75,16 @@ class AbsoluteStatsSchema(ParentSchemaConfig):
 
     group_id: int = Field(description="Внешний ключ для связи с группой")
 
-
-class SnapshotSchema(ParentSchemaConfig):
+class AbsoluteStatsSchema(AbsoluteStatsSchemaBase):
     id: int = Field(
-        alias="snapshot_id",
+        alias="absoluteStats_id",
         description="Уникальный ID записи"
     )
+
+class AbsoluteStatsSchemaCreate(AbsoluteStatsSchemaBase):
+    pass
+
+class SnapshotSchemaBase(ParentSchemaConfig):
     # добавить валидацию на проверку корректности id(зависит от того какие приходят от апи)
     last_message_id: int = Field(
         alias="snapshot_lastMessageId",
@@ -94,19 +96,24 @@ class SnapshotSchema(ParentSchemaConfig):
         default=datetime.now(),
         description="Время снимка состояния"
     )
-    type: Literal[0, 1] = Field(
+    type: SnapshotType = Field(
         alias="snapshot_type",
         description="Тип снимка состояния"
     )
 
     group_id: int = Field(description="Внешний ключ для связи с группой")
 
-
-class SnapshotStatsSchema(ParentSchemaConfig):
-    id: int = Field(
-        alias="snapshotStats_id",
-        description="Уникальный ID снапшота"
+class SnapshotSchema(SnapshotSchemaBase):
+    id: Optional[int] = Field(
+        alias="snapshot_id",
+        description="Уникальный ID записи"
     )
+
+class SnapshotSchemaCreate(SnapshotSchemaBase):
+    pass
+
+
+class SnapshotStatsSchemaBase(ParentSchemaConfig):
     repost_count: int = Field(
         alias="snapshotStats_repostCount",
         description="Количество репостов в разнице с абсолютной статистиков",
@@ -122,7 +129,7 @@ class SnapshotStatsSchema(ParentSchemaConfig):
         description="Количество просмотров в разнице с абсолютной статистикой",
         ge=0
     )
-    participants_count: int = Field(
+    participants_delta: int = Field(
         alias="snapshotStats_participantsCount",
         description="Количество просмотров в разнице с абсолютной статистикой",
         ge=0
@@ -132,13 +139,21 @@ class SnapshotStatsSchema(ParentSchemaConfig):
         description="Охваты"
     )
     comms_count: int = Field(
-        alias="absoluteStats_commsCount",
+        alias="snapshotStats_commsCount",
         description="Общее количество комментариев",
         ge=0
     )
 
     snapshot_id: int = Field(description="Внешний ключ для связи с записью снапшота")
 
+class SnapshotStatsSchema(SnapshotStatsSchemaBase):
+    id: int = Field(
+        alias="snapshotStats_id",
+        description="Уникальный ID снапшота"
+    )
+
+class SnapshotStatsSchemaCreate(SnapshotStatsSchemaBase):
+    pass
 
 class ReportSchema(ParentSchemaConfig):
     id: int = Field(
@@ -192,7 +207,7 @@ class PlatformSchema(ParentSchemaConfig):
     )
 
 
-class ServiceAccount(ParentSchemaConfig):
+class ServiceAccountSchema(ParentSchemaConfig):
     id: int = Field(
         alias="serviceAccount_id",
         description="Уникальный ID сервисного аккаунта"
