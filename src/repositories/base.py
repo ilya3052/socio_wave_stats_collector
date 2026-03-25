@@ -31,7 +31,7 @@ class BaseRepository(Generic[T]):
             raise ValueError('Объект не найден, возможно, он не был создан')
 
         self.session.add(instance)
-        self.session.commit()
+        self.flush()
         return instance.id
 
     def update(self, id, data: Dict) -> Optional[T]:
