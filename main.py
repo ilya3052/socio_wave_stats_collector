@@ -18,7 +18,6 @@ from src.repositories import GroupsRepository, PlatformRepository, ServiceAccoun
 
 async def main(_type):
     # create_tables()
-
     options = {_type: True}
 
     stats = await collect_stats(**options)
@@ -39,7 +38,7 @@ async def create_basic_elem():
             "platform_name": "ВКонтакте"
         })
         repo.add(PlatformModel(**platform.model_dump()))
-
+        repo.commit()
         repo = ServiceAccountRepository(session)
         sacc = ServiceAccountSchema(**{
             "serviceAccount_id": 1,
@@ -48,7 +47,7 @@ async def create_basic_elem():
             "platform_id": 1
         })
         repo.add(ServiceAccountModel(**sacc.model_dump()))
-
+        repo.commit()
         repo = GroupsRepository(session)
         group = GroupSchema(**{
             "group_id": 1,
@@ -60,3 +59,4 @@ async def create_basic_elem():
             "platform_id": 1
         })
         repo.add(GroupModel(**group.model_dump()))
+        repo.commit()

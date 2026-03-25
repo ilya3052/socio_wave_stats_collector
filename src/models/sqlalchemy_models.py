@@ -20,11 +20,6 @@ str_256 = Annotated[str, 256]
 str_512 = Annotated[str, 512]
 
 
-class FileType(StrEnum):
-    XLSX = "xlsx"
-    PDF = "pdf"
-
-
 class Base(DeclarativeBase):
     id: Mapped[int_pk]
     repr_cols_num = 3
@@ -66,11 +61,6 @@ class GroupModel(Base, TypesMixin):
     __table_args__ = (
         UniqueConstraint("platform_id", "external_id", name="uq_group_platform_external"),
     )
-
-
-# class TechData(Base):
-#     __tablename__ = "tech_data"
-#     group_id: Mapped[int] = mapped_column(ForeignKey('groups.id', ondelete='CASCADE'), primary_key=True)
 
 
 class AbsoluteStatsModel(Base, TypesMixin):

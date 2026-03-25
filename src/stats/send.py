@@ -30,7 +30,7 @@ async def send_daily_stats_to_db(stats):
                 "repost_count": stats.get('Репосты', 0),
                 "likes_count": stats.get('Лайки', 0),
                 "views_count": stats.get('Просмотры', 0),
-                "participants_count": participants_count - stats.get('Подписчики', 0),
+                "participants_delta": participants_count - stats.get('Подписчики', 0),
                 "comms_count": stats.get('Комментарии', 0),
                 "snapshot_id": snapshot_id,
                 "coverage": 1

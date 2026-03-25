@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Optional, Literal
+from typing import Optional
 
 from pydantic import BaseModel, Field, ConfigDict
 
@@ -161,46 +161,6 @@ class SnapshotStatsSchema(SnapshotStatsSchemaBase):
 
 class SnapshotStatsSchemaCreate(SnapshotStatsSchemaBase):
     pass
-
-
-class ReportSchema(ParentSchemaConfig):
-    id: int = Field(
-        alias="reportSchema_id",
-        description="Уникальный ID записи об отчете"
-    )
-    filename: str = Field(
-        alias="reportSchema_filename",
-        max_length=256,
-        description="Имя файла"
-    )
-    path: str = Field(
-        alias="reportSchema_path",
-        max_length=512,
-        description="Полный путь к файла"
-    )
-    compilation_date: date = Field(
-        alias="reportSchema_compilationDate",
-        le=date.today(),
-        default=date.today(),
-        description="Дата создания отчета"
-    )
-    filetype: Literal['xlsx', 'pdf'] = Field(
-        alias="reportSchema_filetype",
-        description="Тип отчета"
-    )
-
-    group_id: int = Field(description="Внешний ключ для связи с группой")
-
-    """
-    подумать над тем возможно ли разовое создание нескольких типов отчетов - если да, сделать аннотацию списком и валидацию
-    """
-
-    # @field_validator('filetype', mode='before')
-    # @staticmethod
-    # def validate_filetype(cls, value):
-    #     if isinstance(value, str):
-    #         return [value]
-    #     return value
 
 
 class PlatformSchema(ParentSchemaConfig):

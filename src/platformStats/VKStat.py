@@ -19,7 +19,6 @@ async def _cut_off_excess_part(batch):
 
 
 class VKStat(Stat):
-
     def __init__(self, api, group_id, last_post_id=1, **options):
 
         self._options: Dict[str, Any] = options
