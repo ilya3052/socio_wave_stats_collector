@@ -17,13 +17,16 @@ class AbsoluteStatsRepository(BaseRepository[AbsoluteStatsModel]):
     def get_by_group(self, group_id) -> T:
         return self.session.scalars(select(self.model, group_id)).one()
 
+
 class SnapshotRepository(BaseRepository[SnapshotModel]):
     def __init__(self, session):
         super().__init__(session, SnapshotModel)
 
+
 class SnapshotStatsRepository(BaseRepository[SnapshotStatsModel]):
     def __init__(self, session):
         super().__init__(session, SnapshotModel)
+
 
 class PlatformRepository(BaseRepository[PlatformModel]):
     def __init__(self, session):

@@ -16,4 +16,5 @@ def get_vk_api_session():
         return vk
     return None
 
+
 vk: VkApiMethod = get_vk_api_session()

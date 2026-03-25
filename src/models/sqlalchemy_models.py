@@ -20,9 +20,6 @@ str_256 = Annotated[str, 256]
 str_512 = Annotated[str, 512]
 
 
-
-
-
 class FileType(StrEnum):
     XLSX = "xlsx"
     PDF = "pdf"

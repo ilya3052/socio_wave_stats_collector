@@ -26,4 +26,3 @@ async def handle_vk_group(**kwargs):
     print(f'ID последней записи - {data.get('ID последней записи')}')
     data['Internal ID'] = group.id
     return data
-

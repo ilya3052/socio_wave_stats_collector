@@ -75,14 +75,17 @@ class AbsoluteStatsSchemaBase(ParentSchemaConfig):
 
     group_id: int = Field(description="Внешний ключ для связи с группой")
 
+
 class AbsoluteStatsSchema(AbsoluteStatsSchemaBase):
     id: int = Field(
         alias="absoluteStats_id",
         description="Уникальный ID записи"
     )
 
+
 class AbsoluteStatsSchemaCreate(AbsoluteStatsSchemaBase):
     pass
+
 
 class SnapshotSchemaBase(ParentSchemaConfig):
     # добавить валидацию на проверку корректности id(зависит от того какие приходят от апи)
@@ -103,11 +106,13 @@ class SnapshotSchemaBase(ParentSchemaConfig):
 
     group_id: int = Field(description="Внешний ключ для связи с группой")
 
+
 class SnapshotSchema(SnapshotSchemaBase):
     id: Optional[int] = Field(
         alias="snapshot_id",
         description="Уникальный ID записи"
     )
+
 
 class SnapshotSchemaCreate(SnapshotSchemaBase):
     pass
@@ -146,14 +151,17 @@ class SnapshotStatsSchemaBase(ParentSchemaConfig):
 
     snapshot_id: int = Field(description="Внешний ключ для связи с записью снапшота")
 
+
 class SnapshotStatsSchema(SnapshotStatsSchemaBase):
     id: int = Field(
         alias="snapshotStats_id",
         description="Уникальный ID снапшота"
     )
 
+
 class SnapshotStatsSchemaCreate(SnapshotStatsSchemaBase):
     pass
+
 
 class ReportSchema(ParentSchemaConfig):
     id: int = Field(
