@@ -26,13 +26,12 @@ async def _cut_off_excess_part(_type, batch):
 
 
 class VKStat(Stat):
-    def __init__(self, api, group_id, last_post_id=1, **options):
+    def __init__(self, api, group_id, **options):
 
         self._options: Dict[str, Any] = options
 
         self._api: VkApiMethod = api
         self._group_id = group_id
-        self._last_post_id = last_post_id
         self._group: Optional[Dict[str, str | int]] = None
 
         self._participants_count = 0
@@ -106,9 +105,6 @@ class VKStat(Stat):
 
     async def handle_batch(self, batch):
         for item in batch:  # type: Dict
-            if item.get('id') == self._last_post_id:
-                raise LastPostException
-
             if item.get('is_pinned', False):
                 continue
 
