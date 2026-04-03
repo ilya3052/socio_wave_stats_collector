@@ -1,5 +1,6 @@
 import os
 from enum import Enum, IntEnum
+from typing import Union
 
 from dotenv import load_dotenv
 
@@ -24,11 +25,33 @@ class Type(Enum):
     ABSOLUTE = 'absolute'
 
 
-class SnapshotType(IntEnum):
-    HOURLY = 0
-    DAILY = 1
+class SnapshotType(Enum):
+    HOURLY = Type.HOURLY
+    DAILY = Type.DAILY
 
 
-class Platforms(IntEnum):
-    VK = 1
-    TG = 2
+class Platforms(Enum):
+    VK = (1, 'vk')
+    TG = (2, 'tg')
+
+    def __init__(self, code: int, alias: str):
+        self.code = code
+        self.alias = alias
+
+    @classmethod
+    def _missing_(cls, value: Union[int, str]):
+        if isinstance(value, str):
+            val = value.strip().lower()
+            for member in cls:
+                if member.alias == val:
+                    return member
+        if isinstance(value, int):
+            return cls._value2member_map_.get(value)
+        raise ValueError(f"{value} некорректный параметр для {cls.__name__}")
+
+    @property
+    def id(self) -> int:
+        return self.code
+
+    def __int__(self) -> int:
+        return self.code
