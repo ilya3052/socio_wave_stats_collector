@@ -88,11 +88,6 @@ class AbsoluteStatsSchemaCreate(AbsoluteStatsSchemaBase):
 
 
 class SnapshotSchemaBase(ParentSchemaConfig):
-    # добавить валидацию на проверку корректности id(зависит от того какие приходят от апи)
-    last_message_id: int = Field(
-        alias="snapshot_lastMessageId",
-        description="Последнее обработанное сообщение"
-    )
     timestamp: datetime = Field(
         alias="snapshot_timestamp",
         le=datetime.now(),
