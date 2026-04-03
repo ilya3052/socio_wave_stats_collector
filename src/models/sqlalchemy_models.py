@@ -80,7 +80,6 @@ class AbsoluteStatsModel(Base, TypesMixin):
 class SnapshotModel(Base, TypesMixin):
     __tablename__ = "snapshot"
     repr_columns = ('id',)
-    last_message_id: Mapped[int]
     timestamp: Mapped[created_at]
     type: Mapped[SnapshotType]
     group_id: Mapped[int] = mapped_column(ForeignKey("groups.id", ondelete='CASCADE'))
