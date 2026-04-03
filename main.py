@@ -1,6 +1,10 @@
 import os
 import sys
 
+from icecream import ic
+
+from src.core.config import Platforms
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.stats import collect_stats, handle_stats
@@ -16,18 +20,16 @@ from src.models import GroupSchema, GroupModel, PlatformSchema, \
 from src.repositories import GroupsRepository, PlatformRepository, ServiceAccountRepository
 
 
-async def main(_type):
-    # create_tables()
-    options = {_type: True}
+async def main(platform, _type):
+    try:
+        options = {'platform': Platforms(platform), 'Type': Type(_type)}
+        stats = await collect_stats(**options)
 
-    stats = await collect_stats(**options)
-    await handle_stats(stats, Type(_type))
+        if not await handle_stats(stats, Type(_type)):
+            print('Произошла неизвестная ошибка')
 
-
-if __name__ == "__main__":
-    _type = sys.argv[1].lstrip('-')
-
-    asyncio.run(main(_type))
+    except ValueError as VE:
+        print(VE)
 
 
 async def create_basic_elem():
