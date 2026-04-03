@@ -10,11 +10,18 @@ from .StatABS import Stat
 
 async def _cut_off_excess_part(batch):
     new_batch = []
-    for item in batch:
-        publication_date = item.get('date')
-        date: datetime = datetime.fromtimestamp(publication_date)
-        if date.date() == (datetime.today() - timedelta(days=1)).date():
-            new_batch.append(item)
+    if _type == Type.DAILY:
+        for item in batch:
+            publication_date = item.get('date')
+            date: datetime = datetime.fromtimestamp(publication_date)
+            if date.date() == (datetime.today() - timedelta(days=1)).date():
+                new_batch.append(item)
+    elif _type == Type.HOURLY:
+        for item in batch:
+            publication_date = item.get('date')
+            date: datetime = datetime.fromtimestamp(publication_date)
+            if date >= datetime.now() - timedelta(hours=2):
+                new_batch.append(item)
     return new_batch
 
 
