@@ -48,4 +48,27 @@ async def collect_tg_stats(api, groups, **kwargs):
     return stats
 
 
+collect_functions_dict = {
+    "vk": collect_vk_stats,
+    "tg": collect_tg_stats,
+}
+
+
+async def collect_stats(**kwargs):
+    platform = kwargs.get('platform')
+    api: Optional[VkApiMethod | TelegramClient] = None
+    match platform:
+        case Platforms.VK:
+            api = get_vk_api_session()
+        case Platforms.TG:
+            api = get_tg_api_session()
+    if not api:
+        raise ValueError('Произошла ошибка при получении объекта API')
+
+    groups = await get_groups(platform.id)
+
+    collect_func = collect_functions_dict.get(platform.alias, None)
+    if not collect_func:
+        raise ValueError('Неизвестная платформа')
+    stats = await collect_func(api, groups, **kwargs)
     return stats
