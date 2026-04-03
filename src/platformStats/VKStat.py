@@ -41,8 +41,6 @@ class VKStat(Stat):
         self._repost_count = 0
         self._views = 0
 
-        self._new_last_post_id = 0
-
         self._screen_name = None
         self._name = None
 
