@@ -3,12 +3,12 @@ from typing import Dict, Optional, Any
 
 from vk_api.vk_api import VkApiMethod
 
-from src.core.config import BATCH_SIZE
+from src.core.config import BATCH_SIZE, Type
 from src.exceptions import LastPostException
 from .StatABS import Stat
 
 
-async def _cut_off_excess_part(batch):
+async def _cut_off_excess_part(_type, batch):
     new_batch = []
     if _type == Type.DAILY:
         for item in batch:
