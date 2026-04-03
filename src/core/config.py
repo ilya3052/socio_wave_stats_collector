@@ -53,5 +53,9 @@ class Platforms(Enum):
     def id(self) -> int:
         return self.code
 
+    @property
+    def name(self) -> str:
+        return self.alias
+
     def __int__(self) -> int:
         return self.code
