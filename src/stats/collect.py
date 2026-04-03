@@ -1,33 +1,28 @@
 from typing import Optional, List, Dict
 
+from telethon import TelegramClient
+from vk_api.vk_api import VkApiMethod
+
 from src.core import Session, Platforms, get_vk_api_session
+from src.core.apiTG import get_tg_api_session
 from src.handlers import handle_vk_group, handle_tg_group
 from src.models import GroupSchema
 from src.repositories import GroupsRepository
 
 
-async def get_groups():
+async def get_groups(platform_id):
     groups: Optional[List[GroupSchema]] = None
 
     with Session() as session:
         repo = GroupsRepository(session)
-        groups: List[GroupSchema] = [GroupSchema.model_validate(group) for group in repo.get_all()]
+        groups: List[GroupSchema] = [GroupSchema.model_validate(group) for group in
+                                     repo.get_groups_by_platform(platform_id)]
 
     return groups
 
 
-async def create_apis():
-    api_vk = get_vk_api_session()
-    api_tg = None
-    return api_vk, api_tg
-
-
-async def collect_stats(**kwargs):
-    vk_api, tg_api = await create_apis()
-    groups = await get_groups()
-    options = kwargs
-
-    stats: Optional[Dict[str, str | int]] = None
+async def collect_vk_stats(api, groups, **kwargs):
+    stats: List[Dict[str, str | int]] = []
     for group in groups:  # type: GroupSchema
         stats.append(await handle_vk_group(**{
             "group": group,

@@ -1,5 +1,5 @@
 import os
-from enum import Enum, IntEnum
+from enum import Enum
 from typing import Union
 
 from dotenv import load_dotenv

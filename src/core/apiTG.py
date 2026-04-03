@@ -15,4 +15,3 @@ def get_tg_api_session():
     if tg_api:
         return tg_api
     return None
-

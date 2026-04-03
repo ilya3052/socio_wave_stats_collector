@@ -1,8 +1,6 @@
 import os
 import sys
 
-from icecream import ic
-
 from src.core.config import Platforms
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

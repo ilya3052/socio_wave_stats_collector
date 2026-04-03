@@ -11,5 +11,6 @@ dependencies = [
     "pydantic[email,timezone]>=2.12.5",
     "python-dotenv>=1.2.2",
     "sqlalchemy>=2.0.48",
+    "telethon>=1.42.0",
     "vk-api>=11.10.0",
 ]

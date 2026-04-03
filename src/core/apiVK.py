@@ -15,4 +15,3 @@ def get_vk_api_session():
     if vk_api:
         return vk_api
     return None
-
