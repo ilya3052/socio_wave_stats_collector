@@ -9,6 +9,9 @@ class GroupsRepository(BaseRepository[GroupModel]):
     def __init__(self, session):
         super().__init__(session, GroupModel)
 
+    def get_groups_by_platform(self, platform_id):
+        return self.session.scalars(select(self.model, platform_id)).all()
+
 
 class AbsoluteStatsRepository(BaseRepository[AbsoluteStatsModel]):
     def __init__(self, session):
