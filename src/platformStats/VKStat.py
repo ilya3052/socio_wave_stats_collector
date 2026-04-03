@@ -112,9 +112,6 @@ class VKStat(Stat):
             if item.get('is_pinned', False):
                 continue
 
-            if not self._new_last_post_id:
-                self._new_last_post_id = item.get('id')
-
             self._posts_count += 1
 
             likes = item.get('likes', None)
