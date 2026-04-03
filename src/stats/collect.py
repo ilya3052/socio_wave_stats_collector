@@ -29,18 +29,23 @@ async def collect_stats(**kwargs):
 
     stats: Optional[Dict[str, str | int]] = None
     for group in groups:  # type: GroupSchema
-        match group.platform_id:
-            case Platforms.VK.value:
-                stats = await handle_vk_group(**{
-                    "group": group,
-                    "api": vk_api,
-                    "options": options
-                })
-            case Platforms.TG.value:
-                await handle_tg_group(**{
-                    "group": group,
-                    "api": tg_api,
-                    "options": options
-                })
+        stats.append(await handle_vk_group(**{
+            "group": group,
+            "api": api,
+            "options": kwargs
+        }))
+    return stats
+
+
+async def collect_tg_stats(api, groups, **kwargs):
+    stats: List[Dict[str, str | int]] = []
+    for group in groups:  # type: GroupSchema
+        stats.append(await handle_tg_group(**{
+            "group": group,
+            "api": api,
+            "options": kwargs
+        }))
+    return stats
+
 
     return stats
