@@ -60,3 +60,35 @@ async def create_basic_elem():
         })
         repo.add(GroupModel(**group.model_dump()))
         repo.commit()
+
+
+def print_help():
+    print("""\
+ИСПОЛЬЗОВАНИЕ
+    main.py <command> [options]
+КОМАНДЫ
+    vk             Сбор статистики групп ВКонтакте
+    tg              Сбор статистики каналов Телеграм
+ОПЦИИ
+    --absolute         Сбор полной статистики группы
+    --daily            Сбор статистики за последние сутки
+    --hourly          Сбор статистики за последние два часа
+    -ct --create-tables   Создание таблиц в базе
+    -h --help             Показать эту подсказку
+ПРИМЕРЫ       
+    main.py vkontakte -a
+    main.py --create-tables
+    """)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1 or (sys.argv[1].lstrip('-')) in ('h', 'help'):
+        print_help()
+        exit(0)
+
+    # command, param = sys.argv[1].lstrip('-'), sys.argv[2].lstrip('-')
+
+    if sys.argv[1].lstrip('-') in ('create-tables', 'ct'):
+        asyncio.run(create_basic_elem())
+    else:
+        asyncio.run(main(sys.argv[1].lstrip('-'), sys.argv[2].lstrip('-')))
