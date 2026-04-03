@@ -74,8 +74,8 @@ class VKStat(Stat):
                 items = self._api.wall.get(domain=self._screen_name, offset=offset, count=BATCH_SIZE).get(
                     "items")
 
-                if self._options.get('daily', False):
-                    items = await _cut_off_excess_part(items)
+                if (_type := self._options.get('Type')) != Type.ABSOLUTE:
+                    items = await _cut_off_excess_part(_type, items)
                     if len(items) < BATCH_SIZE:
                         must_stop = True
 
