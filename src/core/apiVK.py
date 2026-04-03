@@ -6,15 +6,13 @@ from .config import SERVICE_KEY
 
 
 def get_vk_api_session():
-    vk: Optional[VkApiMethod] = None
     try:
-        vk = VkApi(token=SERVICE_KEY).get_api()
+        vk_api: Optional[VkApiMethod] = VkApi(token=SERVICE_KEY).get_api()
     except Exception as e:
         print(f"Ошибка: {e}")
+        return None
 
-    if vk:
-        return vk
+    if vk_api:
+        return vk_api
     return None
 
-
-vk: VkApiMethod = get_vk_api_session()
