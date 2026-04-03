@@ -31,6 +31,7 @@ if __name__ == "__main__":
 
 
 async def create_basic_elem():
+    create_tables()
     with Session() as session:
         repo = PlatformRepository(session)
         platform = PlatformSchema(**{
