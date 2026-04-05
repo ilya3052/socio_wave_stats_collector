@@ -44,6 +44,15 @@ async def send_daily_stats_to_db(stats, snapshot_type):
                 })
                 snapshot_stats_repo.add(SnapshotStatsModel(**snapshot_stats_schema.model_dump()))
 
+                abs_repo.update(abs_stats_instance.id, {
+                    "repost_count": abs_stats_instance.repost_count + repost_count,
+                    "likes_count": abs_stats_instance.likes_count + likes_count,
+                    "views_count": abs_stats_instance.views_count + views_count,
+                    "participants_count": abs_stats_instance.participants_count + participants_delta,
+                    "comms_count": abs_stats_instance.comms_count + comms_count,
+                    "last_updated_at": datetime.now()
+                })
+                abs_repo.commit()
                 snapshot_repo.commit()
                 snapshot_stats_repo.commit()
         except ValidationError as VE:
