@@ -34,11 +34,11 @@ async def send_daily_stats_to_db(stats, snapshot_type):
                 comms_count = stats_elem.get('Комментарии', 0)
 
                 snapshot_stats_schema = SnapshotStatsSchemaCreate.model_validate({
-                    "repost_count": stats_elem.get('Репосты', 0),
-                    "likes_count": stats_elem.get('Лайки', 0),
-                    "views_count": stats_elem.get('Просмотры', 0),
-                    "participants_delta": participants_count - stats_elem.get('Подписчики', 0),
-                    "comms_count": stats_elem.get('Комментарии', 0),
+                    "repost_count": repost_count,
+                    "likes_count": likes_count,
+                    "views_count": views_count,
+                    "participants_delta": participants_delta,
+                    "comms_count": comms_count,
                     "snapshot_id": snapshot_id,
                     "coverage": 1
                 })
