@@ -56,7 +56,8 @@ async def collect_stats(**kwargs):
         case Platforms.VK:
             api = get_vk_api_session()
         case Platforms.TG:
-            api = get_tg_api_session()
+            api = kwargs.pop('api')
+
     if not api:
         raise ValueError('Произошла ошибка при получении объекта API')
 
