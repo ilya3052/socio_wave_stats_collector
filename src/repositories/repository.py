@@ -18,7 +18,7 @@ class AbsoluteStatsRepository(BaseRepository[AbsoluteStatsModel]):
         super().__init__(session, AbsoluteStatsModel)
 
     def get_by_group(self, group_id) -> T:
-        return self.session.scalars(select(self.model, group_id)).one()
+        return self.session.scalars(select(self.model).filter_by(group_id=group_id)).one()
 
 
 class SnapshotRepository(BaseRepository[SnapshotModel]):
