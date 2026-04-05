@@ -14,7 +14,7 @@ API_ID = os.getenv("API_ID")
 API_HASH = os.getenv("API_HASH")
 # TOKEN = os.getenv("BOT_TOKEN")
 
-SESSION_PATH = "../sessions/anon.session"
+SESSION_PATH = "src/sessions/anon.session"
 
 BATCH_SIZE = 100
 

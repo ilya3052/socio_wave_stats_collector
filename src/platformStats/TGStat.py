@@ -1,7 +1,6 @@
 from datetime import timedelta, datetime, date, timezone
 from typing import Any, Dict, Optional, Set
 
-from icecream import ic
 from telethon import TelegramClient
 from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.types import Channel, InputChannel, ChatFull, Message
@@ -79,7 +78,8 @@ class TGStat(Stat):
                 end_period = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
                 limit = BATCH_SIZE
 
-            async for msg in self._api.iter_messages(self._channel, limit=limit, reverse=True, offset_date=offset, wait_time=1.0):  # type: Message
+            async for msg in self._api.iter_messages(self._channel, limit=limit, reverse=True, offset_date=offset,
+                                                     wait_time=1.0):  # type: Message
                 if (offset and end_period) and msg.date >= end_period:
                     break
 

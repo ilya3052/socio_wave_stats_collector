@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from icecream import ic
 from pydantic import ValidationError
 
 from src.core import Session
@@ -7,12 +10,13 @@ from src.repositories import AbsoluteStatsRepository, SnapshotRepository, Snapsh
 
 
 async def send_daily_stats_to_db(stats, snapshot_type):
+    ic(stats)
     for stats_elem in stats:
         try:
             with Session() as session:
-                group_id = stats_elem.get('External ID')
+                group_id = stats_elem.get('Internal ID')
                 abs_repo = AbsoluteStatsRepository(session)
-                abs_stats_instance = abs_repo.get_by_group(group_id)
+                abs_stats_instance: AbsoluteStatsModel = abs_repo.get_by_group(group_id)
                 abs_stats_schema = AbsoluteStatsSchema.model_validate(abs_stats_instance)
                 participants_count = abs_stats_schema.participants_count
 

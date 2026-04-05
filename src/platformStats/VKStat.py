@@ -4,7 +4,6 @@ from typing import Dict, Optional, Any
 from vk_api.vk_api import VkApiMethod
 
 from src.core.config import BATCH_SIZE, Type
-from src.exceptions import LastPostException
 from .StatABS import Stat
 
 
@@ -66,7 +65,6 @@ class VKStat(Stat):
         try:
             offset = 0
             must_stop = False
-            last_post = False
             idx = 1
 
             while not must_stop:
@@ -81,20 +79,11 @@ class VKStat(Stat):
                 if not items:
                     break
 
-                try:
-                    print(f'handle batch {idx}')
-                    # start = datetime.now()
-                    if not await self.handle_batch(items):
-                        return False
-                    # now = datetime.now()
-                    # self._time_for_handle += (now - start)
+                print(f'handle batch {idx}')
+                if not await self.handle_batch(items):
+                    return False
+                idx += 1
 
-                    idx += 1
-                except LastPostException:
-                    last_post = True
-
-                if last_post:
-                    break
                 offset += BATCH_SIZE
             return True
 

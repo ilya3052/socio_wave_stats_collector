@@ -4,7 +4,6 @@ from telethon import TelegramClient
 from vk_api.vk_api import VkApiMethod
 
 from src.core import Session, Platforms, get_vk_api_session
-from src.core.apiTG import get_tg_api_session
 from src.handlers import handle_vk_group, handle_tg_group
 from src.models import GroupSchema
 from src.repositories import GroupsRepository
