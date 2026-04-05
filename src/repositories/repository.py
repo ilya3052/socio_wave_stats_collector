@@ -10,7 +10,7 @@ class GroupsRepository(BaseRepository[GroupModel]):
         super().__init__(session, GroupModel)
 
     def get_groups_by_platform(self, platform_id):
-        return self.session.scalars(select(self.model, platform_id)).all()
+        return self.session.scalars(select(self.model).filter_by(platform_id=platform_id)).all()
 
 
 class AbsoluteStatsRepository(BaseRepository[AbsoluteStatsModel]):
