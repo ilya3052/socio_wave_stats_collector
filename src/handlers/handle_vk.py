@@ -23,6 +23,5 @@ async def handle_vk_group(**kwargs):
           f'Обработано записей: {posts_count}')
 
     data: Dict[str, str | int] = await stat.get_data()
-    print(f'ID последней записи - {data.get('ID последней записи')}')
     data['Internal ID'] = group.id
     return data
