@@ -1,7 +1,10 @@
 import os
 import sys
 
+from pydantic import ValidationError
+
 from src.core.config import Platforms
+from src.exceptions.exceptions import GroupsNotFoundError, GroupHandleError, SendingError
 from src.tasks import run_processing_tasks, run_sending_tasks
 from src.tools.create_basic_elem import create_basic_elem
 
@@ -30,9 +33,17 @@ async def main(platform, _type):
         processing_tasks_result = await run_processing_tasks(accounts, **options)
 
         sending_tasks_result = await run_sending_tasks(processing_tasks_result, stats_type)
+        if not all(sending_tasks_result):
+            raise SendingError('Произошла ошибка при отправке данных в БД')
 
-    except ValueError as VE:
-        print(VE)
+    except ValidationError:
+        raise
+    except ValueError:
+        raise
+    except GroupsNotFoundError:
+        raise
+    except GroupHandleError:
+        raise
 
 
 def print_help():
@@ -66,3 +77,13 @@ if __name__ == "__main__":
             asyncio.run(main(sys.argv[1], sys.argv[2].lstrip('-')))
     except KeyboardInterrupt:
         print('Заверешение по прерыванию..')
+    except ValidationError as VE:
+        print(VE, VE.args)
+    except ValueError as VE:
+        print(VE, VE.args)
+    except GroupsNotFoundError as GnFE:
+        print(GnFE, GnFE.args)
+    except GroupHandleError as GHE:
+        print(GHE, GHE.args)
+    except SendingError as SE:
+        print(SE, SE.args)
