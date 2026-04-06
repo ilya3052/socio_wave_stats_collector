@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, Set
 
 from telethon import TelegramClient
 from telethon.tl.functions.channels import GetFullChannelRequest
-from telethon.tl.types import Channel, InputChannel, ChatFull, Message
+from telethon.tl.types import Channel, InputChannel, ChatFull, Message, PeerChannel
 
 from src.core.config import BATCH_SIZE, Type
 from src.platformStats.StatABS import Stat
@@ -46,7 +46,7 @@ class TGStat(Stat):
         self._posts_count = 0
 
     async def get_group(self):
-        self._channel = await self._api.get_entity(self._group_id)
+        self._channel = await self._api.get_entity(PeerChannel(self._group_id))
         self._input_channel = InputChannel(self._channel.id, self._channel.access_hash)
         return True
 
@@ -68,18 +68,15 @@ class TGStat(Stat):
 
             offset: Optional[datetime | date | timedelta] = None
             end_period: Optional[datetime | date] = None
-            limit = None
             if (_type := self._options.get('Type')) == Type.DAILY:
                 offset = (datetime.now(timezone.utc) - timedelta(days=1)).date()
                 end_period = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-                limit = BATCH_SIZE
             elif _type == Type.HOURLY:
                 offset = (datetime.now(timezone.utc) - timedelta(hours=2)).replace(minute=0, second=0, microsecond=0)
                 end_period = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
-                limit = BATCH_SIZE
 
-            async for msg in self._api.iter_messages(self._channel, limit=limit, reverse=True, offset_date=offset,
-                                                     wait_time=1.0):  # type: Message
+            async for msg in self._api.iter_messages(self._channel, reverse=True, offset_date=offset,
+                                                     wait_time=1.2):  # type: Message
                 if (offset and end_period) and msg.date >= end_period:
                     break
 
