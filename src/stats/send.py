@@ -56,9 +56,8 @@ async def send_daily_stats_to_db(stats, snapshot_type):
             abs_repo.commit()
             snapshot_repo.commit()
             snapshot_stats_repo.commit()
-    except ValidationError as VE:
-        print(VE)
-        return False
+    except ValidationError:
+        raise
     return True
 
 
@@ -77,7 +76,6 @@ async def send_absolute_stats_to_db(stats):
             absolute_stats_instance = AbsoluteStatsModel(**absolute_stats_schema.model_dump())
             absolute_stats_repo.add(absolute_stats_instance)
             absolute_stats_repo.commit()
-    except ValidationError as VE:
-        print(VE)
-        return False
+    except ValidationError:
+        raise
     return True
