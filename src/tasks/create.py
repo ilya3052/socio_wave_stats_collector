@@ -24,13 +24,14 @@ async def create_processing_tasks(accounts, **kwargs):
                 collect_stats(groups, api, platform, **{'Type': kwargs.get('Type')}),
                 name=f'processing-by-{platform.alias}-acc-№{idx + 1}'))
 
-        return tasks, True
+        return tasks
     except ValueError:
         raise
 
 
 async def create_sending_tasks(stats_results, stats_type):
     tasks: list[Task] = []
+    print(stats_results)
     for account in stats_results:
         for group_stats in account:
             tasks.append(asyncio.create_task(

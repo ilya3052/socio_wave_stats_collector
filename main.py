@@ -30,13 +30,9 @@ async def main(platform, _type):
         processing_tasks_result = await run_processing_tasks(accounts, **options)
 
         sending_tasks_result = await run_sending_tasks(processing_tasks_result, stats_type)
-        if not all(sending_tasks_result):
-            pass
 
     except ValueError as VE:
         print(VE)
-    except Exception as E:
-        print(E)
 
 
 def print_help():

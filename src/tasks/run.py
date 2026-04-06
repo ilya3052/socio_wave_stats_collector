@@ -7,7 +7,7 @@ async def run_processing_tasks(accounts, **kwargs):
     try:
         tasks = await create_processing_tasks(accounts, **kwargs)
         tasks_result = asyncio.gather(*tasks)
-        return await tasks_result, True
+        return await tasks_result
     except ValueError:
         raise
 
