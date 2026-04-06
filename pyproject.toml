@@ -5,7 +5,6 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "icecream>=2.1.10",
     "psycopg[binary]>=3.3.3",
     "pydantic-settings>=2.13.1",
     "pydantic[email,timezone]>=2.12.5",
@@ -13,4 +12,9 @@ dependencies = [
     "sqlalchemy>=2.0.48",
     "telethon>=1.42.0",
     "vk-api>=11.10.0",
+]
+
+[dependency-groups]
+dev = [
+    "icecream>=2.2.0",
 ]
