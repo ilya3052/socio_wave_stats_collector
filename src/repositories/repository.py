@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload, joinedload
 
 from src.models import GroupModel, AbsoluteStatsModel, SnapshotModel, PlatformModel, ServiceAccountModel, \
     ServiceAccountDataModel, SnapshotStatsModel
@@ -39,6 +40,14 @@ class PlatformRepository(BaseRepository[PlatformModel]):
 class ServiceAccountRepository(BaseRepository[ServiceAccountModel]):
     def __init__(self, session):
         super().__init__(session, ServiceAccountModel)
+
+    def get_with_groups_by_platform(self, platform_id):
+        return (self.session.scalars(select(self.model)
+                                     .filter_by(platform_id=platform_id)
+                                     .options(selectinload(ServiceAccountModel.groups))
+                                     .options(joinedload(ServiceAccountModel.data)))
+
+                .all())
 
 
 class ServiceAccountDataRepository(BaseRepository[ServiceAccountDataModel]):
