@@ -1,12 +1,15 @@
 import os
 import sys
+import traceback
 
+from icecream import ic
 from pydantic import ValidationError
+from sqlalchemy.exc import NoResultFound
 
-from src.core.config import Platforms
-from src.exceptions.exceptions import GroupsNotFoundError, GroupHandleError, SendingError
+from src.core import Platforms
+from src.exceptions import GroupsNotFoundError, GroupHandleError, SendingError
 from src.tasks import run_processing_tasks, run_sending_tasks
-from src.tools.create_basic_elem import create_basic_elem
+from src.tools import create_basic_elem
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -44,6 +47,8 @@ async def main(platform, _type):
         raise
     except GroupHandleError:
         raise
+    except NoResultFound:
+        raise
 
 
 def print_help():
@@ -78,12 +83,26 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print('Заверешение по прерыванию..')
     except ValidationError as VE:
-        print(VE, VE.args)
+        tb_str = ''.join(traceback.format_tb(VE.__traceback__))
+        print("Стек\n", tb_str, '=' * 100)
+        print(VE)
     except ValueError as VE:
-        print(VE, VE.args)
+        tb_str = ''.join(traceback.format_tb(VE.__traceback__))
+        print("Стек\n", tb_str, '=' * 100)
+        print(VE)
     except GroupsNotFoundError as GnFE:
-        print(GnFE, GnFE.args)
+        tb_str = ''.join(traceback.format_tb(GnFE.__traceback__))
+        print("Стек\n", tb_str, '=' * 100)
+        print(GnFE)
     except GroupHandleError as GHE:
-        print(GHE, GHE.args)
+        tb_str = ''.join(traceback.format_tb(GHE.__traceback__))
+        print("Стек\n", tb_str, '=' * 100)
+        print(GHE)
     except SendingError as SE:
-        print(SE, SE.args)
+        tb_str = ''.join(traceback.format_tb(SE.__traceback__))
+        print("Стек\n", tb_str, '=' * 100)
+        print(SE)
+    except NoResultFound as NRF:
+        tb_str = ''.join(traceback.format_tb(NRF.__traceback__))
+        print("Стек\n", tb_str, '=' * 100)
+        print(NRF)
