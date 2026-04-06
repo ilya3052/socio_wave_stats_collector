@@ -194,22 +194,31 @@ class ServiceAccountDataSchema(ParentSchemaConfig):
         alias="serviceAccountData_id",
         description="Уникальный ID записи о данных сервисного аккаунта"
     )
-    serviceKey: Optional[str] = Field(
+    service_key: Optional[str] = Field(
         alias="serviceAccountData_serviceKey",
         max_length=256,
-        description="Сервисный ключ приложения ВК"
+        description="Сервисный ключ приложения ВК",
+        default=None
     )
-    protectedKey: Optional[str] = Field(
+    protected_key: Optional[str] = Field(
         alias="serviceAccountData_protectedKey",
         max_length=256,
-        description="Защищенный ключ приложения ВК"
+        description="Защищенный ключ приложения ВК",
+        default=None
     )
-    phoneNumber: Optional[str] = Field(
+    phone_number: Optional[str] = Field(
         alias="serviceAccountData_phoneNumber",
         min_length=16,
         max_length=16,
         description="Номер телефона аккаунта ТГ",
-        pattern=r"^\+7\(\d{3}\)\s\d{3}-\d{2}-\d{2}$"
+        pattern=r"^\+7\(\d{3}\)\d{3}-\d{2}-\d{2}$",
+        default=None
+    )
+    session_path: Optional[str] = Field(
+        alias="serviceAccountData_sessionPath",
+        max_length=256,
+        description='Путь к файлу сессии аккаунта ТГ',
+        default=None
     )
 
     serviceAccount_id: int = Field(description="Внешний ключ для связи с данными сервисного аккаунта")
