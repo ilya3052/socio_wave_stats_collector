@@ -2,7 +2,7 @@ from typing import Optional
 
 from telethon import TelegramClient
 
-from src.core.config import API_HASH, API_ID
+from src.core import API_HASH, API_ID
 
 
 def get_tg_api_session(session_path):

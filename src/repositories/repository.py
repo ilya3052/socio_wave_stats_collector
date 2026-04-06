@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import selectinload, joinedload
 
 from src.models import GroupModel, AbsoluteStatsModel, SnapshotModel, PlatformModel, ServiceAccountModel, \
@@ -19,7 +20,10 @@ class AbsoluteStatsRepository(BaseRepository[AbsoluteStatsModel]):
         super().__init__(session, AbsoluteStatsModel)
 
     def get_by_group(self, group_id) -> T:
-        return self.session.scalars(select(self.model).filter_by(group_id=group_id)).one()
+        try:
+            return self.session.scalars(select(self.model).filter_by(group_id=group_id)).one()
+        except NoResultFound:
+            raise
 
 
 class SnapshotRepository(BaseRepository[SnapshotModel]):

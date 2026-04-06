@@ -4,7 +4,7 @@ from typing import Annotated, Optional
 from sqlalchemy import String, text, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from src.core.config import SnapshotType
+from src.core import SnapshotType
 
 int_pk = Annotated[int, mapped_column(primary_key=True, autoincrement=True)]
 

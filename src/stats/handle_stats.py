@@ -1,4 +1,5 @@
 from pydantic import ValidationError
+from sqlalchemy.exc import NoResultFound
 
 from src.core import Type
 from .send import send_daily_stats_to_db, send_absolute_stats_to_db
@@ -17,4 +18,6 @@ async def handle_stats(stats, stats_type):
                 raise ValueError('Неизвестный тип снапшота')
         return True
     except ValidationError:
+        raise
+    except NoResultFound:
         raise

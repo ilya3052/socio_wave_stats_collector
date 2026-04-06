@@ -3,8 +3,8 @@ from typing import Optional
 from telethon import TelegramClient
 from vk_api.vk_api import VkApiMethod
 
-from src.api.apiTG import get_tg_api_session
-from src.api.apiVK import get_vk_api_session
+from .apiTG import get_tg_api_session
+from .apiVK import get_vk_api_session
 from src.core import Platforms
 from src.models import ServiceAccountDataModel
 

@@ -94,7 +94,7 @@ async def create_basic_elem():
         repo = ServiceAccountDataRepository(session)
         data_vk = ServiceAccountDataSchema(**{
             "serviceAccountData_id": 1,
-            "serviceAccountData_serviceKey": '123',
+            "serviceAccountData_serviceKey": 'b37b1bceb37b1bceb37b1bce66b045b144bb37bb37b1bceda04751ed922c3191f19eaad',
             "serviceAccountData_protectedKey": '123',
             "serviceAccount_id": 1
         })

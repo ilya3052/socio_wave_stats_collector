@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from pydantic import ValidationError
+from sqlalchemy.exc import NoResultFound
 
 from src.core import Session
 from src.models import AbsoluteStatsSchema, SnapshotSchemaCreate, SnapshotModel, SnapshotStatsSchemaCreate, \
@@ -57,6 +58,8 @@ async def send_daily_stats_to_db(stats, snapshot_type):
             snapshot_repo.commit()
             snapshot_stats_repo.commit()
     except ValidationError:
+        raise
+    except NoResultFound:
         raise
     return True
 

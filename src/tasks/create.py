@@ -2,13 +2,13 @@ import asyncio
 
 from _asyncio import Task
 from pydantic import ValidationError
+from sqlalchemy.exc import NoResultFound
 
 from src.api import get_api
 from src.core import Platforms
-from src.exceptions.exceptions import GroupsNotFoundError, GroupHandleError
+from src.exceptions import GroupsNotFoundError, GroupHandleError
 from src.models import ServiceAccountModel
-from src.stats import handle_stats
-from src.stats.collect import collect_stats
+from src.stats import handle_stats, collect_stats
 
 
 async def create_processing_tasks(accounts, **kwargs):
@@ -49,4 +49,6 @@ async def create_sending_tasks(stats_results, stats_type):
 
         return tasks
     except ValidationError:
+        raise
+    except NoResultFound:
         raise

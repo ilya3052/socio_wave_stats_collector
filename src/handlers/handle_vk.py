@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict
 
-from src.exceptions.exceptions import GroupHandleError
+from src.exceptions import GroupHandleError
 from src.platformStats import VKStat
 
 

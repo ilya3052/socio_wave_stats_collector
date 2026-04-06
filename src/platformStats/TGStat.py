@@ -5,8 +5,8 @@ from telethon import TelegramClient
 from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.types import Channel, InputChannel, ChatFull, Message, PeerChannel
 
-from src.core.config import BATCH_SIZE, Type
-from src.platformStats.StatABS import Stat
+from src.core import BATCH_SIZE, Type
+from .StatABS import Stat
 
 
 async def get_item_stats(msg):

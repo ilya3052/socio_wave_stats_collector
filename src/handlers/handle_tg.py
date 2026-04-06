@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Dict
 
-from src.exceptions.exceptions import GroupHandleError
-from src.platformStats.TGStat import TGStat
+from src.exceptions import GroupHandleError
+from src.platformStats import TGStat
 
 
 async def handle_tg_group(api, group, **kwargs):

@@ -1,7 +1,7 @@
 from typing import List, Dict
 
 from src.core import Platforms
-from src.exceptions.exceptions import GroupHandleError
+from src.exceptions import GroupHandleError
 from src.handlers import handle_vk_group, handle_tg_group
 from src.models import GroupSchema
 

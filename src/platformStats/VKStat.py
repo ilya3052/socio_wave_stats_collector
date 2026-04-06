@@ -3,7 +3,7 @@ from typing import Dict, Optional, Any
 
 from vk_api.vk_api import VkApiMethod
 
-from src.core.config import BATCH_SIZE, Type
+from src.core import BATCH_SIZE, Type
 from .StatABS import Stat
 
 

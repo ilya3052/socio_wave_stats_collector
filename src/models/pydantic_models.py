@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, ConfigDict
 
-from src.core.config import SnapshotType
+from src.core import SnapshotType
 
 
 class ParentSchemaConfig(BaseModel):
