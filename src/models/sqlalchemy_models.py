@@ -49,6 +49,9 @@ class GroupModel(Base, TypesMixin):
     link: Mapped[str_256]
     added_at: Mapped[created_at]
     serviceAccount_id: Mapped[int] = mapped_column(ForeignKey("serviceAccounts.id", ondelete='SET NULL'))
+    service_account: Mapped['ServiceAccountModel'] = relationship(
+        back_populates='groups'
+    )
     platform_id: Mapped[int] = mapped_column(ForeignKey("platforms.id", ondelete="CASCADE"))
     platform: Mapped['PlatformModel'] = relationship(back_populates='groups')
 
@@ -120,6 +123,9 @@ class ServiceAccountModel(Base, TypesMixin):
         uselist=False,
         back_populates='serviceAccount'
     )
+    groups: Mapped[list['GroupModel']] = relationship(
+        back_populates='service_account'
+    )
 
 
 class ServiceAccountDataModel(Base, TypesMixin):
@@ -128,6 +134,7 @@ class ServiceAccountDataModel(Base, TypesMixin):
     service_key: Mapped[Optional[str_256]]
     protected_key: Mapped[Optional[str_256]]
     phone_number: Mapped[Optional[str_16]]
+    session_path: Mapped[Optional[str_256]]
 
     serviceAccount_id: Mapped[int] = mapped_column(ForeignKey("serviceAccounts.id", ondelete='CASCADE'))
     serviceAccount: Mapped['ServiceAccountModel'] = relationship(back_populates='data')
