@@ -1,28 +1,37 @@
 from typing import List, Dict
 
 from src.core import Platforms
+from src.exceptions.exceptions import GroupHandleError
 from src.handlers import handle_vk_group, handle_tg_group
 from src.models import GroupSchema
 
 
 async def collect_vk_stats(api, groups, **kwargs):
-    stats: List[Dict[str, str | int]] = []
-    for group in groups:  # type: GroupSchema
-        stats.append(await handle_vk_group(**{
-            "group": group,
-            "api": api,
-            "options": kwargs
-        }))
-    return stats
+    try:
+        stats: List[Dict[str, str | int]] = []
+        for group in groups:  # type: GroupSchema
+            stats.append(await handle_vk_group(api, group, **{
+                "options": kwargs
+            }))
+        return stats
+    except GroupHandleError:
+        raise
+    except ValueError:
+        raise
 
 
 async def collect_tg_stats(api, groups, **kwargs):
-    stats: List[Dict[str, str | int]] = []
-    for group in groups:  # type: GroupSchema
-        stats.append(await handle_tg_group(api, group, **{
-            "options": kwargs
-        }))
-    return stats
+    try:
+        stats: List[Dict[str, str | int]] = []
+        for group in groups:  # type: GroupSchema
+            stats.append(await handle_tg_group(api, group, **{
+                "options": kwargs
+            }))
+        return stats
+    except GroupHandleError:
+        raise
+    except ValueError:
+        raise
 
 
 collect_functions_dict = {
@@ -41,6 +50,12 @@ async def collect_stats(groups, api, platform, **kwargs):
         elif platform == Platforms.TG:
             async with api:
                 stats = await collect_func(api, groups, **kwargs)
+
+        if not stats:
+            raise ValueError('Ошибка при получении данных статисики')
+
         return stats
     except ValueError:
+        raise
+    except GroupHandleError:
         raise
