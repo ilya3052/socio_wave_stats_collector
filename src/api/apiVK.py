@@ -2,12 +2,10 @@ from typing import Optional
 
 from vk_api.vk_api import VkApiMethod, VkApi
 
-from .config import SERVICE_KEY
 
-
-def get_vk_api_session():
+def get_vk_api_session(service_key):
     try:
-        vk_api: Optional[VkApiMethod] = VkApi(token=SERVICE_KEY).get_api()
+        vk_api: Optional[VkApiMethod] = VkApi(token=service_key).get_api()
     except Exception as e:
         print(f"Ошибка: {e}")
         return None
