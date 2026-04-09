@@ -3,7 +3,9 @@ from typing import Dict
 
 from src.exceptions import GroupHandleError
 from src.platformStats import VKStat
+import logging
 
+logger = logging.getLogger(__name__)
 
 async def handle_vk_group(api, group, **kwargs):
     options = kwargs.get('options')
@@ -11,15 +13,20 @@ async def handle_vk_group(api, group, **kwargs):
     stat = VKStat(api=api, group_id=group.external_id, **options)
 
     start = datetime.now()
-    if not await stat.prepare_object():
-        raise GroupHandleError(f'Произошла ошибка при обработке группы {group.name} на платформе ВК')
+    try:
+        if not await stat.prepare_object():
+            raise GroupHandleError(f'Не удалось подготовить объект группы {group.name} (VK)')
+    except Exception as e:
+        logger.exception(f"Критическая ошибка обработки группы TG {group.name} с ID {group.external_id}")
+        raise GroupHandleError(f'Произошла ошибка при обработке группы {group.name} на платформе TG') from e
     now = datetime.now()
 
-    # будет писать куда-нибудь в логи
+
     posts_count = await stat.get_service_data()
 
-    print(f'Время полной обработки с запросами - {(now - start).total_seconds()} c.\n'
-          f'Обработано записей: {posts_count}')
+    logger.info(
+        f"VK группа '{group.name}' обработана за {(now - start).total_seconds():.2f} сек. Обработано записей: {posts_count}",
+    )
 
     data: Dict[str, str | int] = await stat.get_data()
     if not data:
