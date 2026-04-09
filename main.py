@@ -10,14 +10,20 @@ from src.core import Platforms
 from src.exceptions import GroupsNotFoundError, GroupHandleError, SendingError
 from src.tasks import run_processing_tasks, run_sending_tasks
 from src.tools import create_basic_elem
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
+import logging
+from src.logger import configure_logging
 import asyncio
 
 from src.core import Session, Type
 
 from src.repositories import ServiceAccountRepository
+
+configure_logging()
+logger = logging.getLogger(__name__)
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+
 
 
 async def get_serv_accounts(platform_id):
@@ -28,26 +34,26 @@ async def get_serv_accounts(platform_id):
 
 async def main(platform, _type):
     try:
+        logger.info("Запуск сбора статистики")
+        logger.info(f"Платформа: {platform} | Тип: {_type}")
+
         _platform = Platforms(platform)
         stats_type = Type(_type)
+
         accounts = await get_serv_accounts(_platform.id)
+        logger.info(f"Найдено сервисных аккаунтов: {len(accounts)} (групп: {sum(len(acc.groups) for acc in accounts)})")
+
         options = {'platform': Platforms(platform), 'Type': stats_type}
 
         processing_tasks_result = await run_processing_tasks(accounts, **options)
+        logger.info("Этап обработки статистики завершён")
 
         sending_tasks_result = await run_sending_tasks(processing_tasks_result, stats_type)
         if not all(sending_tasks_result):
             raise SendingError('Произошла ошибка при отправке данных в БД')
+        logger.info("Сбор и отправка статистики завершены успешно")
 
-    except ValidationError:
-        raise
-    except ValueError:
-        raise
-    except GroupsNotFoundError:
-        raise
-    except GroupHandleError:
-        raise
-    except NoResultFound:
+    except (ValidationError, ValueError, GroupsNotFoundError, GroupHandleError, NoResultFound, SendingError):
         raise
 
 
@@ -72,37 +78,33 @@ def print_help():
 
 if __name__ == "__main__":
     try:
-        if len(sys.argv) == 1 or (sys.argv[1].lstrip('-')) in ('h', 'help'):
+        if len(sys.argv) == 1 or sys.argv[1].lstrip('-') in ('h', 'help'):
             print_help()
-            exit(0)
+            sys.exit(0)
 
         if sys.argv[1].lstrip('-') in ('create-tables', 'ct'):
+            logger.info("Запущено создание/пересоздание таблиц в базе данных")
             asyncio.run(create_basic_elem())
+            logger.info("Таблицы успешно созданы")
         else:
             asyncio.run(main(sys.argv[1], sys.argv[2].lstrip('-')))
+
     except KeyboardInterrupt:
-        print('Заверешение по прерыванию..')
+        logger.warning("Программа прервана пользователем во время выполнения (KeyboardInterrupt)")
     except ValidationError as VE:
-        tb_str = ''.join(traceback.format_tb(VE.__traceback__))
-        print("Стек\n", tb_str, '=' * 100)
         print(VE)
     except ValueError as VE:
-        tb_str = ''.join(traceback.format_tb(VE.__traceback__))
-        print("Стек\n", tb_str, '=' * 100)
         print(VE)
     except GroupsNotFoundError as GnFE:
-        tb_str = ''.join(traceback.format_tb(GnFE.__traceback__))
-        print("Стек\n", tb_str, '=' * 100)
         print(GnFE)
     except GroupHandleError as GHE:
-        tb_str = ''.join(traceback.format_tb(GHE.__traceback__))
-        print("Стек\n", tb_str, '=' * 100)
         print(GHE)
     except SendingError as SE:
-        tb_str = ''.join(traceback.format_tb(SE.__traceback__))
-        print("Стек\n", tb_str, '=' * 100)
         print(SE)
     except NoResultFound as NRF:
-        tb_str = ''.join(traceback.format_tb(NRF.__traceback__))
-        print("Стек\n", tb_str, '=' * 100)
         print(NRF)
+    except Exception as e:
+        logger.exception("НЕОБРАБОТАННОЕ ИСКЛЮЧЕНИЕ")
+        print(e)
+    else:
+        logger.info("main.py завершён без ошибок")
