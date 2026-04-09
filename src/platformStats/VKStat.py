@@ -6,6 +6,10 @@ from vk_api.vk_api import VkApiMethod
 from src.core import BATCH_SIZE, Type
 from .StatABS import Stat
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 async def _cut_off_excess_part(_type, batch):
     new_batch = []
@@ -97,35 +101,28 @@ class VKStat(Stat):
             if item.get('is_pinned', False):
                 continue
 
-            self._posts_count += 1
+            try:
+                self._posts_count += 1
 
-            likes = item.get('likes', None)
-            if not likes:
-                return False
-            likes_count = likes.get('count', 0)
+                likes_count = item.get('likes', {}).get('count', 0)
+                comments_count = item.get("comments", {}).get('count', 0)
+                reposts_count = item.get("reposts", {}).get('count', 0)
+                views_count = item.get("views", {}).get('count', 0)
 
-            comments = item.get("comments", None)
-            if not comments:
-                return False
-            comments_count = comments.get('count', 0)
+                self._comments_count += comments_count
+                self._likes_count += likes_count
+                self._repost_count += reposts_count
+                self._views += views_count
 
-            reposts = item.get("reposts", None)
-            if not reposts:
-                return False
-            reposts_count = reposts.get('count', 0)
-
-            views = item.get("views", None)
-            if not views:
-                return False
-            views_count = views.get('count', 0)
-
-            self._comments_count += comments_count
-            self._likes_count += likes_count
-            self._repost_count += reposts_count
-            self._views += views_count
+            except Exception as e:
+                post_id = item.get('id', 'unknown')
+                logger.warning(
+                    "⚠️ Ошибка обработки поста %s в группе VK %s: %s",
+                    post_id, self._group_id, e
+                )
+                continue
 
         return True
-
     async def get_data(self):
         return {
             "Название группы": self._name,
