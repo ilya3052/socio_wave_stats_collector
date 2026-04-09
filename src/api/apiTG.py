@@ -1,17 +1,17 @@
-from typing import Optional
+import logging
 
 from telethon import TelegramClient
 
 from src.core import API_HASH, API_ID
 
+logger = logging.getLogger(__name__)
+
 
 def get_tg_api_session(session_path):
     try:
-        tg_api: Optional[TelegramClient] = TelegramClient(api_id=API_ID, api_hash=API_HASH, session=session_path)
-    except Exception as e:
-        print('Ошибка при получении api', e)
-        return None
-
-    if tg_api:
+        tg_api = TelegramClient(api_id=API_ID, api_hash=API_HASH, session=session_path)
+        logger.debug(f"TelegramClient создан для сессии {session_path}")
         return tg_api
-    return None
+    except Exception as e:
+        logger.error(f"Ошибка создания TelegramClient: {e}")
+        return None
