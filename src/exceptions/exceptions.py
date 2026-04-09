@@ -1,8 +1,8 @@
-class GroupsNotFoundError(BaseException):
+class GroupsNotFoundError(Exception):
     pass
 
-class GroupHandleError(BaseException):
+class GroupHandleError(Exception):
     pass
 
-class SendingError(BaseException):
+class SendingError(Exception):
     pass
