@@ -1,9 +1,10 @@
+import logging
 from typing import Optional
 
 from vk_api.vk_api import VkApiMethod, VkApi
 
-import logging
 logger = logging.getLogger(__name__)
+
 
 def get_vk_api_session(service_key):
     try:
@@ -13,4 +14,3 @@ def get_vk_api_session(service_key):
     except Exception as e:
         logger.exception(f"Ошибка создания объекта VK API: {e}")
         return None
-

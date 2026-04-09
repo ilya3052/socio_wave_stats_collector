@@ -1,2 +1,2 @@
-from .VKStat import VKStat
 from .TGStat import TGStat
+from .VKStat import VKStat

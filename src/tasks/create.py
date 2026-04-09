@@ -2,8 +2,6 @@ import asyncio
 import logging
 
 from _asyncio import Task
-from pydantic import ValidationError
-from sqlalchemy.exc import NoResultFound
 
 from src.api import get_api
 from src.core import Platforms
@@ -26,7 +24,8 @@ async def create_processing_tasks(accounts, **kwargs):
         for idx, account in enumerate(accounts, 1):  # type: int, ServiceAccountModel
             groups = account.groups
             if not groups:
-                logger.error(f"GroupsNotFoundError для сервисного аккаунта с ID {account.id} (платформа {platform.alias})")
+                logger.error(
+                    f"GroupsNotFoundError для сервисного аккаунта с ID {account.id} (платформа {platform.alias})")
                 raise GroupsNotFoundError('Произошла ошибка при получении групп для сервисного аккаунта')
 
             api = await get_api(account.data, platform)
@@ -64,6 +63,6 @@ async def create_sending_tasks(stats_results, stats_type):
         logger.info(f"Создано {len(tasks)} задач отправки в БД")
         return tasks
 
-    except Exception as e:
+    except Exception:
         logger.exception("Ошибка при создании задач отправки")
         raise

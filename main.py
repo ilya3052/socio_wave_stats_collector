@@ -1,29 +1,23 @@
+import asyncio
+import logging
 import os
 import sys
-import traceback
 
-from icecream import ic
 from pydantic import ValidationError
 from sqlalchemy.exc import NoResultFound
 
 from src.core import Platforms
+from src.core import Session, Type
 from src.exceptions import GroupsNotFoundError, GroupHandleError, SendingError
+from src.logger import configure_logging
+from src.repositories import ServiceAccountRepository
 from src.tasks import run_processing_tasks, run_sending_tasks
 from src.tools import create_basic_elem
-import logging
-from src.logger import configure_logging
-import asyncio
-
-from src.core import Session, Type
-
-from src.repositories import ServiceAccountRepository
 
 configure_logging()
 logger = logging.getLogger(__name__)
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-
 
 
 async def get_serv_accounts(platform_id):

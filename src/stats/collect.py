@@ -1,12 +1,13 @@
+import logging
 from typing import List, Dict
 
 from src.core import Platforms
 from src.exceptions import GroupHandleError
 from src.handlers import handle_vk_group, handle_tg_group
 from src.models import GroupSchema
-import logging
 
 logger = logging.getLogger(__name__)
+
 
 async def collect_vk_stats(api, groups, **kwargs):
     try:

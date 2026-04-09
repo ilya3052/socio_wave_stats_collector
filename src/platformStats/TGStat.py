@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta, datetime, date, timezone
 from typing import Any, Dict, Optional, Set
 
@@ -7,10 +8,9 @@ from telethon.tl.types import Channel, InputChannel, ChatFull, Message, PeerChan
 
 from src.core import BATCH_SIZE, Type
 from .StatABS import Stat
-import logging
-
 
 logger = logging.getLogger(__name__)
+
 
 async def get_item_stats(msg):
     reactions_count, repost_count, replies_count = 0, 0, 0

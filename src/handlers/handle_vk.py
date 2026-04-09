@@ -1,11 +1,12 @@
+import logging
 from datetime import datetime
 from typing import Dict
 
 from src.exceptions import GroupHandleError
 from src.platformStats import VKStat
-import logging
 
 logger = logging.getLogger(__name__)
+
 
 async def handle_vk_group(api, group, **kwargs):
     options = kwargs.get('options')
@@ -20,7 +21,6 @@ async def handle_vk_group(api, group, **kwargs):
         logger.exception(f"Критическая ошибка обработки группы TG {group.name} с ID {group.external_id}")
         raise GroupHandleError(f'Произошла ошибка при обработке группы {group.name} на платформе TG') from e
     now = datetime.now()
-
 
     posts_count = await stat.get_service_data()
 

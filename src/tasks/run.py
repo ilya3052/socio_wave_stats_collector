@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from pydantic import ValidationError
 from sqlalchemy.exc import NoResultFound
@@ -6,8 +7,8 @@ from sqlalchemy.exc import NoResultFound
 from src.exceptions import GroupsNotFoundError, GroupHandleError
 from .create import create_processing_tasks, create_sending_tasks
 
-import logging
 logger = logging.getLogger(__name__)
+
 
 async def run_processing_tasks(accounts, **kwargs):
     try:

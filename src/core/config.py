@@ -26,8 +26,8 @@ class Type(Enum):
 
 
 class SnapshotType(Enum):
-    HOURLY = Type.HOURLY
-    DAILY = Type.DAILY
+    HOURLY = Type.HOURLY.value
+    DAILY = Type.DAILY.value
 
 
 class Platforms(Enum):

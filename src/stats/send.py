@@ -1,15 +1,16 @@
+import logging
 from datetime import datetime
 
 from pydantic import ValidationError
 from sqlalchemy.exc import NoResultFound
 
-from src.core import Session, SnapshotType
+from src.core import Session
 from src.models import AbsoluteStatsSchema, SnapshotSchemaCreate, SnapshotModel, SnapshotStatsSchemaCreate, \
     SnapshotStatsModel, AbsoluteStatsSchemaCreate, AbsoluteStatsModel
 from src.repositories import AbsoluteStatsRepository, SnapshotRepository, SnapshotStatsRepository
-import logging
 
 logger = logging.getLogger(__name__)
+
 
 async def send_stats_to_db(stats, snapshot_type):
     try:
@@ -62,17 +63,20 @@ async def send_stats_to_db(stats, snapshot_type):
             abs_repo.commit()
             snapshot_repo.commit()
             snapshot_stats_repo.commit()
-            logger.info("✅ Daily/Hourly статистика успешно сохранена в БД для группы ID=%s", group_id)
+            logger.info("Daily/Hourly статистика успешно сохранена в БД для группы ID=%s", group_id)
             return True
 
     except ValidationError as e:
-        logger.error(f"Ошибка валидации при сохранении статистики для группы {stats.get('Internal ID', 'unknown')}: {e}")
+        logger.error(
+            f"Ошибка валидации при сохранении статистики для группы {stats.get('Internal ID', 'unknown')}: {e}")
         raise
     except NoResultFound as e:
-        logger.error(f"Ошибка NoResultFound при сохранении статистики для группы {stats.get('Internal ID', 'unknown')}: {e}")
+        logger.error(
+            f"Ошибка NoResultFound при сохранении статистики для группы {stats.get('Internal ID', 'unknown')}: {e}")
         raise
     except Exception as e:
-        logger.exception(f"Неожиданная ошибка в send_daily_stats_to_db для группы {stats.get('Internal ID', 'unknown')}")
+        logger.exception(
+            f"Неожиданная ошибка в send_daily_stats_to_db для группы {stats.get('Internal ID', 'unknown')}")
         raise
 
 
@@ -96,8 +100,10 @@ async def send_absolute_stats_to_db(stats):
             logger.info(f"Абсолютная статистика успешно сохранена в БД для группы с ID {stats.get('Internal ID')}")
             return True
     except ValidationError as e:
-        logger.error(f"Ошибка валидации при сохранении абсолютной статистики для группы {stats.get('Internal ID', 'unknown')}: {e}")
+        logger.error(
+            f"Ошибка валидации при сохранении абсолютной статистики для группы {stats.get('Internal ID', 'unknown')}: {e}")
         raise
     except Exception as e:
-        logger.exception(f"Неожиданная ошибка в send_absolute_stats_to_db для группы {stats.get('Internal ID', 'unknown')}")
+        logger.exception(
+            f"Неожиданная ошибка в send_absolute_stats_to_db для группы {stats.get('Internal ID', 'unknown')}")
         raise

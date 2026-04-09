@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Any
 
@@ -5,8 +6,6 @@ from vk_api.vk_api import VkApiMethod
 
 from src.core import BATCH_SIZE, Type
 from .StatABS import Stat
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -117,12 +116,11 @@ class VKStat(Stat):
             except Exception as e:
                 post_id = item.get('id', 'unknown')
                 logger.warning(
-                    "⚠️ Ошибка обработки поста %s в группе VK %s: %s",
-                    post_id, self._group_id, e
-                )
+                    f"Ошибка обработки поста {post_id} в группе VK {self._group_id}: {e}")
                 continue
 
         return True
+
     async def get_data(self):
         return {
             "Название группы": self._name,
