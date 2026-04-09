@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from _asyncio import Task
 from pydantic import ValidationError
@@ -10,45 +11,59 @@ from src.exceptions import GroupsNotFoundError, GroupHandleError
 from src.models import ServiceAccountModel
 from src.stats import handle_stats, collect_stats
 
+logger = logging.getLogger(__name__)
+
 
 async def create_processing_tasks(accounts, **kwargs):
     try:
         tasks: list[Task] = []
-        for idx, account in enumerate(accounts):  # type: int, ServiceAccountModel
+        platform: Platforms = kwargs.get('platform')
+        stats_type = kwargs.get('Type')
+
+        logger.info(
+            f"Создание задач обработки для {len(accounts)} аккаунтов на платформе {platform.alias.upper()} (тип снапшота - {stats_type})")
+
+        for idx, account in enumerate(accounts, 1):  # type: int, ServiceAccountModel
             groups = account.groups
             if not groups:
+                logger.error(f"GroupsNotFoundError для сервисного аккаунта с ID {account.id} (платформа {platform.alias})")
                 raise GroupsNotFoundError('Произошла ошибка при получении групп для сервисного аккаунта')
 
-            platform: Platforms = kwargs.get('platform')
             api = await get_api(account.data, platform)
 
             if not api:
+                logger.error(f"Не удалось получить API для аккаунта с ID {account.id} (платформа {platform.alias})")
                 raise ValueError('Произошла ошибка при получении объекта API')
 
             tasks.append(asyncio.create_task(
                 collect_stats(groups, api, platform, **{'Type': kwargs.get('Type')}),
-                name=f'processing-by-{platform.alias}-acc-№{idx + 1}'))
+                name=f'processing-by-{platform.alias}-acc-№{idx}'))
 
+        logger.info(f"Создано {len(tasks)} задач обработки для платформы {platform.alias.upper()}")
         return tasks
-    except ValueError:
+
+    except (ValueError, GroupsNotFoundError, GroupHandleError):
         raise
-    except GroupsNotFoundError:
-        raise
-    except GroupHandleError:
+    except Exception as e:
+        logger.exception("Неожиданная ошибка при создании задач обработки")
         raise
 
 
 async def create_sending_tasks(stats_results, stats_type):
     try:
         tasks: list[Task] = []
-        for account in stats_results:
-            for group_stats in account:
+        logger.info(f"Создание задач отправки статистики (тип: {stats_type}, групп: {len(stats_results)})")
+
+        for account_stats in stats_results:
+            for group_stats in account_stats:
                 tasks.append(asyncio.create_task(
-                    handle_stats(group_stats, stats_type)
+                    handle_stats(group_stats, stats_type),
+                    name=f'sending-stats-group-{group_stats.get("Internal ID", "unknown")}'
                 ))
 
+        logger.info(f"Создано {len(tasks)} задач отправки в БД")
         return tasks
-    except ValidationError:
-        raise
-    except NoResultFound:
+
+    except Exception as e:
+        logger.exception("Ошибка при создании задач отправки")
         raise
