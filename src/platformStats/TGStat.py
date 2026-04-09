@@ -7,7 +7,10 @@ from telethon.tl.types import Channel, InputChannel, ChatFull, Message, PeerChan
 
 from src.core import BATCH_SIZE, Type
 from .StatABS import Stat
+import logging
 
+
+logger = logging.getLogger(__name__)
 
 async def get_item_stats(msg):
     reactions_count, repost_count, replies_count = 0, 0, 0
@@ -108,13 +111,20 @@ class TGStat(Stat):
             if not isinstance(item, Message):
                 continue
 
-            item_stats = await get_item_stats(item)
+            try:
+                item_stats = await get_item_stats(item)
 
-            self._posts_count += 1
-            self._views += item_stats[0]
-            self._likes_count += item_stats[1]
-            self._comments_count += item_stats[2]
-            self._repost_count += item_stats[3]
+                self._posts_count += 1
+                self._views += item_stats[0]
+                self._likes_count += item_stats[1]
+                self._comments_count += item_stats[2]
+                self._repost_count += item_stats[3]
+            except Exception as e:
+                post_id = item.id or 'unknown'
+                logger.warning(
+                    f"Ошибка обработки записи {post_id} в группе TG {self._group_id}: {e}",
+                )
+                continue
         return True
 
     async def get_service_data(self):
