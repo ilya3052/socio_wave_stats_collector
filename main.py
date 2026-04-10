@@ -14,7 +14,7 @@ from src.repositories import ServiceAccountRepository
 from src.tasks import run_processing_tasks, run_sending_tasks
 from src.tools import create_basic_elem
 
-configure_logging()
+
 logger = logging.getLogger(__name__)
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -77,10 +77,12 @@ if __name__ == "__main__":
             sys.exit(0)
 
         if sys.argv[1].lstrip('-') in ('create-tables', 'ct'):
+            configure_logging()
             logger.info("Запущено создание/пересоздание таблиц в базе данных")
             asyncio.run(create_basic_elem())
             logger.info("Таблицы успешно созданы")
         else:
+            configure_logging(sys.argv[1].lstrip('-'))
             asyncio.run(main(sys.argv[1], sys.argv[2].lstrip('-')))
 
     except KeyboardInterrupt:
