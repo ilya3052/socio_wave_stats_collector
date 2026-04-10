@@ -63,7 +63,7 @@ async def send_stats_to_db(stats, snapshot_type):
             abs_repo.commit()
             snapshot_repo.commit()
             snapshot_stats_repo.commit()
-            logger.info("Daily/Hourly статистика успешно сохранена в БД для группы ID=%s", group_id)
+            logger.info(f"{snapshot_type.value} статистика успешно сохранена в БД для группы с ID {group_id}")
             return True
 
     except ValidationError as e:

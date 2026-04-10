@@ -19,7 +19,7 @@ async def create_processing_tasks(accounts, **kwargs):
         stats_type = kwargs.get('Type')
 
         logger.info(
-            f"Создание задач обработки для {len(accounts)} аккаунтов на платформе {platform.alias.upper()} (тип снапшота - {stats_type})")
+            f"Создание задач обработки для {len(accounts)} аккаунтов на платформе {platform.alias.upper()} (тип снапшота - {stats_type.value})")
 
         for idx, account in enumerate(accounts, 1):  # type: int, ServiceAccountModel
             groups = account.groups
@@ -51,7 +51,7 @@ async def create_processing_tasks(accounts, **kwargs):
 async def create_sending_tasks(stats_results, stats_type):
     try:
         tasks: list[Task] = []
-        logger.info(f"Создание задач отправки статистики (тип: {stats_type}, групп: {len(stats_results)})")
+        logger.info(f"Создание задач отправки статистики (тип: {stats_type.value}, групп: {len(stats_results)})")
 
         for account_stats in stats_results:
             for group_stats in account_stats:
