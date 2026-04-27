@@ -45,7 +45,7 @@ class TypesMixin:
 
 
 class GroupModel(Base, TypesMixin):
-    __tablename__ = "groups"
+    __tablename__ = "social_entities_group"
     external_id: Mapped[int]
     name: Mapped[str_128]
     link: Mapped[str_256]
@@ -68,7 +68,7 @@ class GroupModel(Base, TypesMixin):
 
 
 class AbsoluteStatsModel(Base, TypesMixin):
-    __tablename__ = "absoluteStats"
+    __tablename__ = "stats_absolutestats"
     likes_count: Mapped[int]
     views_count: Mapped[int]
     participants_count: Mapped[int]
@@ -82,7 +82,7 @@ class AbsoluteStatsModel(Base, TypesMixin):
 
 
 class SnapshotModel(Base, TypesMixin):
-    __tablename__ = "snapshot"
+    __tablename__ = "stats_snapshot"
     repr_columns = ('id',)
     timestamp: Mapped[created_at]
     type: Mapped[SnapshotType]
@@ -93,7 +93,7 @@ class SnapshotModel(Base, TypesMixin):
 
 
 class SnapshotStatsModel(Base, TypesMixin):
-    __tablename__ = "snapshotStats"
+    __tablename__ = "stats_snapshotstats"
     repr_columns = ('id',)
     likes_count: Mapped[int]
     views_count: Mapped[int]
@@ -109,7 +109,7 @@ class SnapshotStatsModel(Base, TypesMixin):
 
 
 class PlatformModel(Base, TypesMixin):
-    __tablename__ = "platforms"
+    __tablename__ = "social_entitites_platform"
 
     name: Mapped[str_128]
     alias: Mapped[str_16]
@@ -118,7 +118,7 @@ class PlatformModel(Base, TypesMixin):
 
 
 class ServiceAccountModel(Base, TypesMixin):
-    __tablename__ = "serviceAccounts"
+    __tablename__ = "service_accounts_serviceaccount"
     name: Mapped[str_128]
 
     platform_id: Mapped[int] = mapped_column(ForeignKey("platforms.id", ondelete="CASCADE"))
@@ -141,7 +141,7 @@ class ServiceAccountModel(Base, TypesMixin):
 
 
 class ServiceAccountDataModel(Base, TypesMixin):
-    __tablename__ = "serviceAccountData"
+    __tablename__ = "service_accounts_serviceaccountdata"
 
     service_key: Mapped[Optional[str_256]]
     protected_key: Mapped[Optional[str_256]]

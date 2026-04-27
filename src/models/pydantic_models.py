@@ -35,7 +35,7 @@ class GroupSchema(ParentSchemaConfig):
         default=date.today()
     )
 
-    serviceAccount_id: int = Field(description="Внешний ключ для связи с сервисным аккаунтом")
+    service_account_id: int = Field(description="Внешний ключ для связи с сервисным аккаунтом")
     platform_id: int = Field(description="Внешний ключ для связи с записью платформы")
 
 
