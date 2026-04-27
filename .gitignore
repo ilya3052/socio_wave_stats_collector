@@ -10,6 +10,8 @@ wheels/
 .venv
 .idea
 *.env
+db
+sessions
 *.db
 *.session
 logs

@@ -16,7 +16,7 @@ DB_NAME = os.getenv('DB_NAME')
 
 # DB_URL = f"postgresql+psycopg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 DB_URL = "sqlite:///db/example.db"
-
+os.makedirs('db/', exist_ok=True)
 engine = create_engine(
     url=DB_URL,
     # echo=True,
