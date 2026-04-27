@@ -169,16 +169,17 @@ class PlatformSchema(ParentSchemaConfig):
         description="Название платформы"
     )
 
+    alias: str = Field(
+        alias="platform_alias",
+        max_length=16,
+        description="Алиас платформы"
+    )
+
 
 class ServiceAccountSchema(ParentSchemaConfig):
     id: int = Field(
         alias="serviceAccount_id",
         description="Уникальный ID сервисного аккаунта"
-    )
-    link: str = Field(
-        alias="serviceAccount_link",
-        max_length=256,
-        description="Ссылка на сервисный аккаунт на платформе"
     )
     name: str = Field(
         alias="serviceAccount_name",
@@ -187,6 +188,17 @@ class ServiceAccountSchema(ParentSchemaConfig):
     )
 
     platform_id: int = Field(description="Внешний ключ для связи с платформой")
+
+    app_id: Optional[int] = Field(
+        alias="serviceAccount_app_id",
+        description="appID приложения ВК",
+        default=None
+    )
+
+    is_activated: bool = Field(
+        alias="serviceAccount_is_activated",
+        description="Статус активации аккаунта"
+    )
 
 
 class ServiceAccountDataSchema(ParentSchemaConfig):
@@ -208,10 +220,9 @@ class ServiceAccountDataSchema(ParentSchemaConfig):
     )
     phone_number: Optional[str] = Field(
         alias="serviceAccountData_phoneNumber",
-        min_length=16,
-        max_length=16,
+        min_length=11,
+        max_length=11,
         description="Номер телефона аккаунта ТГ",
-        pattern=r"^\+7\(\d{3}\)\d{3}-\d{2}-\d{2}$",
         default=None
     )
     session_path: Optional[str] = Field(

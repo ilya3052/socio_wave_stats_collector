@@ -3,9 +3,8 @@ import logging
 import os
 import sys
 
-from pydantic import ValidationError
 from sqlalchemy.exc import NoResultFound
-
+from pydantic import ValidationError
 from src.core import Platforms
 from src.core import Session, Type
 from src.exceptions import GroupsNotFoundError, GroupHandleError, SendingError
@@ -13,7 +12,6 @@ from src.logger import configure_logging
 from src.repositories import ServiceAccountRepository
 from src.tasks import run_processing_tasks, run_sending_tasks
 from src.tools import create_basic_elem
-
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +24,7 @@ async def get_serv_accounts(platform_id):
         return repo.get_with_groups_by_platform(platform_id)
 
 
-async def main(platform, _type):
+async def start_collecting_statistics(platform, _type):
     try:
         logger.info("Запуск сбора статистики")
         logger.info(f"Платформа: {platform} | Тип: {_type}")
@@ -51,9 +49,9 @@ async def main(platform, _type):
         raise
 
 
-def print_help():
-    print("""\
-ИСПОЛЬЗОВАНИЕ
+def main():
+    """
+    ИСПОЛЬЗОВАНИЕ
     main.py <command> [options]
 КОМАНДЫ
     vk             Сбор статистики групп ВКонтакте
@@ -64,16 +62,13 @@ def print_help():
     --hourly          Сбор статистики за последние два часа
     -ct --create-tables   Создание таблиц в базе
     -h --help             Показать эту подсказку
-ПРИМЕРЫ       
+ПРИМЕРЫ
     main.py vkontakte -a
     main.py --create-tables
-    """)
-
-
-if __name__ == "__main__":
+    """
     try:
         if len(sys.argv) == 1 or sys.argv[1].lstrip('-') in ('h', 'help'):
-            print_help()
+            print(main.__doc__)
             sys.exit(0)
 
         if sys.argv[1].lstrip('-') in ('create-tables', 'ct'):
@@ -83,7 +78,7 @@ if __name__ == "__main__":
             logger.info("Таблицы успешно созданы")
         else:
             configure_logging(sys.argv[1].lstrip('-'))
-            asyncio.run(main(sys.argv[1], sys.argv[2].lstrip('-')))
+            asyncio.run(start_collecting_statistics(sys.argv[1], sys.argv[2].lstrip('-')))
 
     except KeyboardInterrupt:
         logger.warning("Программа прервана пользователем во время выполнения (KeyboardInterrupt)")
@@ -104,3 +99,7 @@ if __name__ == "__main__":
         print(e)
     else:
         logger.info("main.py завершён без ошибок")
+
+
+if __name__ == "__main__":
+    main()

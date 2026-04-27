@@ -13,6 +13,7 @@ updated_at = Annotated[datetime, mapped_column(server_default=text("TIMEZONE('ut
 
 today = Annotated[datetime, mapped_column(server_default=text("CURRENT_DATE"))]
 
+str_11 = Annotated[str, 11]
 str_16 = Annotated[str, 16]
 str_128 = Annotated[str, 128]
 str_256 = Annotated[str, 256]
@@ -35,6 +36,7 @@ class Base(DeclarativeBase):
 
 class TypesMixin:
     type_annotation_map = {
+        str_11: String(11),
         str_16: String(16),
         str_128: String(128),
         str_256: String(256),
@@ -110,16 +112,26 @@ class PlatformModel(Base, TypesMixin):
     __tablename__ = "platforms"
 
     name: Mapped[str_128]
-
+    alias: Mapped[str_16]
     groups: Mapped[list['GroupModel']] = relationship(back_populates='platform')
+    accounts: Mapped[list['ServiceAccountModel']] = relationship(back_populates='platform')
 
 
 class ServiceAccountModel(Base, TypesMixin):
     __tablename__ = "serviceAccounts"
-    link: Mapped[str_256]
     name: Mapped[str_128]
+
     platform_id: Mapped[int] = mapped_column(ForeignKey("platforms.id", ondelete="CASCADE"))
+    platform: Mapped['PlatformModel'] = relationship(
+        back_populates='accounts'
+    )
+
+    app_id: Mapped[Optional[int]] = mapped_column(unique=True, nullable=True)
+
+    is_activated: Mapped[bool] = mapped_column(server_default=text('false'))
+
     data: Mapped['ServiceAccountDataModel'] = relationship(
+
         uselist=False,
         back_populates='serviceAccount'
     )
@@ -133,7 +145,7 @@ class ServiceAccountDataModel(Base, TypesMixin):
 
     service_key: Mapped[Optional[str_256]]
     protected_key: Mapped[Optional[str_256]]
-    phone_number: Mapped[Optional[str_16]]
+    phone_number: Mapped[Optional[str_11]]
     session_path: Mapped[Optional[str_256]]
 
     serviceAccount_id: Mapped[int] = mapped_column(ForeignKey("serviceAccounts.id", ondelete='CASCADE'))
