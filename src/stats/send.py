@@ -38,7 +38,7 @@ async def send_stats_to_db(stats, snapshot_type):
             repost_count = stats.get('Репосты', 0)
             likes_count = stats.get('Лайки', 0)
             views_count = stats.get('Просмотры', 0)
-            participants_delta = participants_count - stats.get('Подписчики', 0)
+            participants_delta = stats.get('Подписчики', 0) - participants_count
             comms_count = stats.get('Комментарии', 0)
 
             snapshot_stats_schema = SnapshotStatsSchemaCreate.model_validate({
