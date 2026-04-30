@@ -9,6 +9,8 @@ load_dotenv()
 API_ID = os.getenv("API_ID")
 API_HASH = os.getenv("API_HASH")
 
+KEY = os.getenv('ENCRYPTION_KEY')
+
 BATCH_SIZE = 100
 
 
@@ -24,8 +26,8 @@ class SnapshotType(Enum):
 
 
 class Platforms(Enum):
-    VK = (1, 'vk')
-    TG = (2, 'tg')
+    VK = (2, 'vk')
+    TG = (1, 'tg')
 
     def __init__(self, code: int, alias: str):
         self.code = code

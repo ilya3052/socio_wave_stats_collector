@@ -215,7 +215,7 @@ class PlatformSchema(ParentSchemaConfig):
 
 class ServiceAccountSchema(ParentSchemaConfig):
     id: int = Field(
-        alias="serviceAccount_id",
+        alias="service_account_id",
         description="Уникальный ID сервисного аккаунта"
     )
     name: str = Field(

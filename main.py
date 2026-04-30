@@ -32,7 +32,6 @@ async def start_collecting_statistics(platform, _type):
 
         _platform = Platforms(platform)
         stats_type = Type(_type)
-
         accounts = await get_serv_accounts(_platform.id)
         logger.info(f"Найдено сервисных аккаунтов: {len(accounts)} (групп: {sum(len(acc.groups) for acc in accounts)})")
         options = {'platform': Platforms(platform), 'Type': stats_type}
