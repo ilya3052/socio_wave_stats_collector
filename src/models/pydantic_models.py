@@ -132,7 +132,6 @@ class SnapshotStatsSchemaBase(ParentSchemaConfig):
     participants_delta: int = Field(
         alias="snapshotStats_participantsCount",
         description="Количество просмотров в разнице с абсолютной статистикой",
-        ge=0
     )
     coverage: int = Field(
         alias="snapshotStats_coverage",
