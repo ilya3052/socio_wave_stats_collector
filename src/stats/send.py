@@ -48,7 +48,7 @@ async def send_stats_to_db(stats, snapshot_type):
                 "participants_delta": participants_delta,
                 "comms_count": comms_count,
                 "snapshot_id": snapshot_id,
-                "coverage": round(((likes_count + repost_count + comms_count) / views_count) * 100, 2)
+                "coverage": round(((likes_count + repost_count + comms_count) / views_count) * 100, 2) # заменить название поля на ERR
             })
             snapshot_stats_repo.add(SnapshotStatsModel(**snapshot_stats_schema.model_dump()))
 
