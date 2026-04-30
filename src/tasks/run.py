@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 async def run_processing_tasks(accounts, **kwargs):
     try:
+        print(accounts)
         tasks = await create_processing_tasks(accounts, **kwargs)
         logger.info(f"Запуск {len(tasks)} задач обработки статистики")
         return await asyncio.gather(*tasks, return_exceptions=False)

@@ -28,14 +28,14 @@ async def create_basic_elem():
 
         repo = ServiceAccountRepository(session)
         sacc_vk = ServiceAccountSchema(**{
-            "serviceAccount_id": 1,
+            "service_account_id": 1,
             "serviceAccount_name": 'SocialPulse',
             "serviceAccount_is_activated": True,
             "serviceAccount_app_id": 54438538,
             "platform_id": 1
         })
         sacc_tg = ServiceAccountSchema(**{
-            "serviceAccount_id": 2,
+            "service_account_id": 2,
             "serviceAccount_name": 'SocialPulse',
             "serviceAccount_is_activated": True,
             "platform_id": 2
@@ -52,7 +52,7 @@ async def create_basic_elem():
             "group_name": "Липецкий Политех (ЛГТУ)",
             "group_link": "https://vk.ru/infolgtu",
             "group_addedAt": datetime.now().date(),
-            "serviceAccount_id": 1,
+            "service_account_id": 1,
             "platform_id": 1
         })
         group_tg = GroupSchema(**{
@@ -61,7 +61,7 @@ async def create_basic_elem():
             "group_name": "Липецкий Политех (ЛГТУ)",
             "group_link": "https://t.me/infolgtu",
             "group_addedAt": datetime.now().date(),
-            "serviceAccount_id": 2,
+            "service_account_id": 2,
             "platform_id": 2
         })
 
@@ -74,13 +74,13 @@ async def create_basic_elem():
             "serviceAccountData_id": 1,
             "serviceAccountData_serviceKey": 'b37b1bceb37b1bceb37b1bce66b045b144bb37bb37b1bceda04751ed922c3191f19eaad',
             "serviceAccountData_protectedKey": 'chq1b4w5YPy71LuKFX70',
-            "serviceAccount_id": 1
+            "service_account_id": 1
         })
         data_tg1 = ServiceAccountDataSchema(**{
             "serviceAccountData_id": 2,
             "serviceAccountData_phoneNumber": '79205189704',
             "serviceAccountData_sessionPath": 'sessions/79205189704.session',
-            "serviceAccount_id": 2,
+            "service_account_id": 2,
         })
 
         repo.add(ServiceAccountDataModel(**data_vk.model_dump()))
