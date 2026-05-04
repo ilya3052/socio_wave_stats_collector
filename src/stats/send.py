@@ -40,6 +40,7 @@ async def send_stats_to_db(stats, snapshot_type):
             views_count = stats.get('Просмотры', 0)
             participants_delta = stats.get('Подписчики', 0) - participants_count
             comms_count = stats.get('Комментарии', 0)
+            posts_count = stats.get('Количество записей', 0)
 
             snapshot_stats_schema = SnapshotStatsSchemaCreate.model_validate({
                 "repost_count": repost_count,
@@ -48,7 +49,8 @@ async def send_stats_to_db(stats, snapshot_type):
                 "participants_delta": participants_delta,
                 "comms_count": comms_count,
                 "snapshot_id": snapshot_id,
-                "coverage": round(((likes_count + repost_count + comms_count) / views_count) * 100, 2) # заменить название поля на ERR
+                # "coverage": round(((likes_count + repost_count + comms_count) / views_count) * 100, 2) # заменить название поля на ERR
+                "coverage": 1
             })
             snapshot_stats_repo.add(SnapshotStatsModel(**snapshot_stats_schema.model_dump()))
 
@@ -56,8 +58,9 @@ async def send_stats_to_db(stats, snapshot_type):
                 "repost_count": abs_stats_instance.repost_count + repost_count,
                 "likes_count": abs_stats_instance.likes_count + likes_count,
                 "views_count": abs_stats_instance.views_count + views_count,
-                "participants_count": abs_stats_instance.participants_count + participants_delta,
+                "participants_count": stats.get('Подписчики', 0),
                 "comms_count": abs_stats_instance.comms_count + comms_count,
+                "posts_count": posts_count,
                 "last_updated_at": datetime.now()
             })
             abs_repo.commit()
@@ -92,6 +95,7 @@ async def send_absolute_stats_to_db(stats):
                 "participants_count": stats.get('Подписчики'),
                 "repost_count": stats.get('Репосты'),
                 "comms_count": stats.get('Комментарии'),
+                "posts_count": stats.get('Количество записей'),
                 "group_id": stats.get('Internal ID')
             })
             absolute_stats_instance = AbsoluteStatsModel(**absolute_stats_schema.model_dump())
