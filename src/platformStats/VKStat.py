@@ -130,6 +130,7 @@ class VKStat(Stat):
             "Комментарии": self._comments_count,
             "Репосты": self._repost_count,
             "Просмотры": self._views,
+            "Количество записей": self._posts_count,
             'screen_name': self._screen_name
         }
 
