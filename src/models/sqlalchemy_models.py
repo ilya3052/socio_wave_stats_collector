@@ -75,6 +75,7 @@ class AbsoluteStatsModel(Base, TypesMixin):
     repost_count: Mapped[int]
     comms_count: Mapped[int]
     last_updated_at: Mapped[updated_at]
+    posts_count: Mapped[int]
     group_id: Mapped[int] = mapped_column(ForeignKey("groups.id", ondelete='CASCADE'))
     group: Mapped['GroupModel'] = relationship(
         back_populates='stats'

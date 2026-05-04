@@ -73,6 +73,12 @@ class AbsoluteStatsSchemaBase(ParentSchemaConfig):
         default=datetime.now()
     )
 
+    posts_count: int = Field(
+        alias="absoluteStats_postsCount",
+        description='Общее количество записей в группе',
+        ge=0
+    )
+
     group_id: int = Field(description="Внешний ключ для связи с группой")
 
 
