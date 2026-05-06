@@ -12,11 +12,11 @@ from src.stats import handle_stats, collect_stats
 logger = logging.getLogger(__name__)
 
 
-async def create_processing_tasks(accounts, **kwargs):
+async def create_processing_tasks(accounts, **options):
     try:
         tasks: list[Task] = []
-        platform: Platforms = kwargs.get('platform')
-        stats_type = kwargs.get('Type')
+        platform = options.pop('platform')
+        stats_type = options.get('Type')
 
         logger.info(
             f"Создание задач обработки для {len(accounts)} аккаунтов на платформе {platform.alias.upper()} (тип снапшота - {stats_type.value})")
@@ -33,9 +33,8 @@ async def create_processing_tasks(accounts, **kwargs):
             if not api:
                 logger.error(f"Не удалось получить API для аккаунта с ID {account.id} (платформа {platform.alias})")
                 raise ValueError('Произошла ошибка при получении объекта API')
-
             tasks.append(asyncio.create_task(
-                collect_stats(groups, api, platform, **{'Type': kwargs.get('Type')}),
+                collect_stats(groups, api, platform, **options),
                 name=f'processing-by-{platform.alias}-acc-№{idx}'))
 
         logger.info(f"Создано {len(tasks)} задач обработки для платформы {platform.alias.upper()}")

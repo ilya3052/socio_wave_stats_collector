@@ -9,12 +9,12 @@ from src.models import GroupSchema
 logger = logging.getLogger(__name__)
 
 
-async def collect_vk_stats(api, groups, **kwargs):
+async def collect_vk_stats(api, groups, **options):
     try:
         stats: List[Dict[str, str | int]] = []
         for group in groups:  # type: GroupSchema
             logger.info(f"Старт обработки VK группы с ID {group.id} ({group.name}) (ID в VK {group.external_id})")
-            group_stats = await handle_vk_group(api, group, **{"options": kwargs})
+            group_stats = await handle_vk_group(api, group, **options)
             stats.append(group_stats)
             logger.info(f"VK группа '{group.name}' успешно обработана")
         return stats
@@ -27,12 +27,12 @@ async def collect_vk_stats(api, groups, **kwargs):
         raise
 
 
-async def collect_tg_stats(api, groups, **kwargs):
+async def collect_tg_stats(api, groups, **options):
     try:
         stats: List[Dict[str, str | int]] = []
         for group in groups:  # type: GroupSchema
             logger.info(f"Старт обработки TG группы с ID {group.id} ({group.name}) (ID в TG {group.external_id})")
-            group_stats = await handle_tg_group(api, group, **{"options": kwargs})
+            group_stats = await handle_tg_group(api, group, **options)
             stats.append(group_stats)
             logger.info(f"TG группа '{group.name}' успешно обработана")
         return stats
@@ -51,7 +51,7 @@ collect_functions_dict = {
 }
 
 
-async def collect_stats(groups, api, platform, **kwargs):
+async def collect_stats(groups, api, platform, **options):
     try:
         collect_func = collect_functions_dict.get(platform.alias)
         if not collect_func:
@@ -63,10 +63,10 @@ async def collect_stats(groups, api, platform, **kwargs):
         stats = None
 
         if platform == Platforms.VK:
-            stats = await collect_func(api, groups, **kwargs)
+            stats = await collect_func(api, groups, **options)
         elif platform == Platforms.TG:
             async with api:
-                stats = await collect_func(api, groups, **kwargs)
+                stats = await collect_func(api, groups, **options)
 
         if not stats:
             logger.error(f"collect_func вернула пустой результат для {platform.alias}")

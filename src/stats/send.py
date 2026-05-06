@@ -6,8 +6,8 @@ from sqlalchemy.exc import NoResultFound
 
 from src.core import Session
 from src.models import AbsoluteStatsSchema, SnapshotSchemaCreate, SnapshotModel, SnapshotStatsSchemaCreate, \
-    SnapshotStatsModel, AbsoluteStatsSchemaCreate, AbsoluteStatsModel
-from src.repositories import AbsoluteStatsRepository, SnapshotRepository, SnapshotStatsRepository
+    SnapshotStatsModel, AbsoluteStatsSchemaCreate, AbsoluteStatsModel, BestPostsSchema, BestPostsModel
+from src.repositories import AbsoluteStatsRepository, SnapshotRepository, SnapshotStatsRepository, BestPostsRepository
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +101,23 @@ async def send_absolute_stats_to_db(stats):
             absolute_stats_instance = AbsoluteStatsModel(**absolute_stats_schema.model_dump())
             absolute_stats_repo.add(absolute_stats_instance)
             absolute_stats_repo.commit()
+
+            top_posts = stats.get('top_posts')
+
+            best_posts_repo = BestPostsRepository(session)
+            best_posts_schema = BestPostsSchema.model_validate({
+                "most_liked": top_posts.get('most_liked').get('id'),
+                "most_reposted": top_posts.get('most_reposted').get('id'),
+                "most_commented": top_posts.get('most_commented').get('id'),
+                "most_viewed": top_posts.get('most_viewed').get('id'),
+                "last_updated_at": datetime.now(),
+                "group_id": stats.get('internal_id')
+            })
+            best_posts_instance = BestPostsModel(**best_posts_schema.model_dump())
+            best_posts_repo.add(best_posts_instance)
+            best_posts_repo.commit()
+
+
             logger.info(f"Абсолютная статистика успешно сохранена в БД для группы с ID {stats.get('Internal ID')}")
             return True
     except ValidationError as e:

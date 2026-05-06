@@ -39,6 +39,30 @@ class GroupSchema(ParentSchemaConfig):
     platform_id: int = Field(description="Внешний ключ для связи с записью платформы")
 
 
+class BestPostsSchema(ParentSchemaConfig):
+    most_liked: int = Field(
+        alias="bestPost_mostLiked",
+        description="Наиболее залайканный пост"
+    )
+    most_reposted: int = Field(
+        alias="bestPost_mostReposted",
+        description="Наиболее репостнутый"
+    )
+    most_commented: int = Field(
+        alias="bestPost_mostCommented",
+        description="Наиболее комментируемый"
+    )
+    most_viewed: int = Field(
+        alias="bestPost_mostViewed",
+        description="Наиболее просматриваемый"
+    )
+    last_updated_at: datetime = Field(
+        alias="bestPost_addedAt",
+        le=date.today(),
+        default=date.today()
+    )
+
+
 class AbsoluteStatsSchemaBase(ParentSchemaConfig):
     likes_count: int = Field(
         alias="absoluteStats_likesCount",

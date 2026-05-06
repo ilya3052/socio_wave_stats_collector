@@ -8,9 +8,7 @@ from src.platformStats import TGStat
 logger = logging.getLogger(__name__)
 
 
-async def handle_tg_group(api, group, **kwargs):
-    options = kwargs.get('options')
-
+async def handle_tg_group(api, group, **options):
     stat = TGStat(api=api, group_id=group.external_id, **options)
 
     start = datetime.now()

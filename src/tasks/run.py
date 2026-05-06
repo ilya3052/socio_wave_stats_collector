@@ -10,9 +10,9 @@ from .create import create_processing_tasks, create_sending_tasks
 logger = logging.getLogger(__name__)
 
 
-async def run_processing_tasks(accounts, **kwargs):
+async def run_processing_tasks(accounts, **options):
     try:
-        tasks = await create_processing_tasks(accounts, **kwargs)
+        tasks = await create_processing_tasks(accounts, **options)
         logger.info(f"Запуск {len(tasks)} задач обработки статистики")
         return await asyncio.gather(*tasks, return_exceptions=False)
     except (ValueError, GroupsNotFoundError, GroupHandleError):
