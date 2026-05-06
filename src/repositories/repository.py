@@ -19,6 +19,7 @@ class BestPostsRepository(BaseRepository[BestPostsModel]):
     def __init__(self, session):
         super().__init__(session, BestPostsModel)
 
+
 class AbsoluteStatsRepository(BaseRepository[AbsoluteStatsModel]):
     def __init__(self, session):
         super().__init__(session, AbsoluteStatsModel)

@@ -117,7 +117,6 @@ async def send_absolute_stats_to_db(stats):
             best_posts_repo.add(best_posts_instance)
             best_posts_repo.commit()
 
-
             logger.info(f"Абсолютная статистика успешно сохранена в БД для группы с ID {stats.get('Internal ID')}")
             return True
     except ValidationError as e:

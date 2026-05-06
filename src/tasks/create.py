@@ -4,7 +4,6 @@ import logging
 from _asyncio import Task
 
 from src.api import get_api
-from src.core import Platforms
 from src.exceptions import GroupsNotFoundError, GroupHandleError
 from src.models import ServiceAccountModel
 from src.stats import handle_stats, collect_stats

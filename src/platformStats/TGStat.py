@@ -176,7 +176,6 @@ class TGStat(Stat):
                 "count": views_count
             }
 
-
     async def get_service_data(self):
         return self._posts_count
 

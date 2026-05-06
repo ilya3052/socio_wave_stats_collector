@@ -69,6 +69,7 @@ class GroupModel(Base, TypesMixin):
         UniqueConstraint("platform_id", "external_id", name="uq_group_platform_external"),
     )
 
+
 class BestPostsModel(Base, TypesMixin):
     __tablename__ = "bestPosts"
     most_liked: Mapped[int]
@@ -79,6 +80,7 @@ class BestPostsModel(Base, TypesMixin):
 
     group_id: Mapped[int] = mapped_column(ForeignKey("groups.id", ondelete="CASCADE"))
     group: Mapped['GroupModel'] = relationship(back_populates='best_posts')
+
 
 class AbsoluteStatsModel(Base, TypesMixin):
     __tablename__ = "absoluteStats"
