@@ -48,6 +48,25 @@ class TGStat(Stat):
         self._seen_groups: Set = set()
         self._posts_count = 0
 
+        self._top_posts = {
+            "most_liked": {
+                "id": 0,
+                "count": 0
+            },
+            "most_reposted": {
+                "id": 0,
+                "count": 0
+            },
+            "most_commented": {
+                "id": 0,
+                "count": 0
+            },
+            "most_viewed": {
+                "id": 0,
+                "count": 0
+            }
+        }
+
     async def get_group(self):
         self._channel = await self._api.get_entity(PeerChannel(self._group_id))
         self._input_channel = InputChannel(self._channel.id, self._channel.access_hash)
@@ -114,11 +133,19 @@ class TGStat(Stat):
             try:
                 item_stats = await get_item_stats(item)
 
+                views_count = item_stats[0]
+                likes_count = item_stats[1]
+                comments_count = item_stats[2]
+                reposts_count = item_stats[3]
+
+                if 'additional' in self._options and self._options.get('additional') == 'update':
+                    await self._update_top_posts(item, likes_count, comments_count, reposts_count, views_count)
+
                 self._posts_count += 1
-                self._views += item_stats[0]
-                self._likes_count += item_stats[1]
-                self._comments_count += item_stats[2]
-                self._repost_count += item_stats[3]
+                self._views += views_count
+                self._likes_count += likes_count
+                self._comments_count += comments_count
+                self._repost_count += reposts_count
             except Exception as e:
                 post_id = item.id or 'unknown'
                 logger.warning(
@@ -126,6 +153,29 @@ class TGStat(Stat):
                 )
                 continue
         return True
+
+    async def _update_top_posts(self, item: Message, likes_count, comments_count, reposts_count, views_count):
+        if likes_count >= self._top_posts.get('most_liked').get('count'):
+            self._top_posts['most_liked'] = {
+                "id": item.id,
+                "count": likes_count
+            }
+        if comments_count >= self._top_posts.get('most_reposted').get('count'):
+            self._top_posts['most_reposted'] = {
+                "id": item.id,
+                "count": comments_count
+            }
+        if reposts_count >= self._top_posts.get('most_commented').get('count'):
+            self._top_posts['most_commented'] = {
+                "id": item.id,
+                "count": reposts_count
+            }
+        if views_count >= self._top_posts.get('most_viewed').get('count'):
+            self._top_posts['most_viewed'] = {
+                "id": item.id,
+                "count": views_count
+            }
+
 
     async def get_service_data(self):
         return self._posts_count
