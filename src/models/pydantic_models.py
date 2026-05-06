@@ -58,36 +58,43 @@ class BestPostsSchema(ParentSchemaConfig):
     )
     last_updated_at: datetime = Field(
         alias="bestPost_addedAt",
-        le=date.today(),
+        ge=date.today(),
         default=date.today()
     )
+
+    group_id: int = Field(description="Внешний ключ для связи с группой")
 
 
 class AbsoluteStatsSchemaBase(ParentSchemaConfig):
     likes_count: int = Field(
         alias="absoluteStats_likesCount",
         description="Общее количество лайков",
-        ge=0
+        ge=0,
+        default=0
     )
     views_count: int = Field(
         alias="absoluteStats_viewsCount",
         description="Общее количество просмотров",
-        ge=0
+        ge=0,
+        default=0
     )
     participants_count: int = Field(
         alias="absoluteStats_participantsCount",
         description="Общее количество просмотров",
-        ge=0
+        ge=0,
+        default=0
     )
     repost_count: int = Field(
         alias="absoluteStats_repostCount",
         description="Общее количество репостов",
-        ge=0
+        ge=0,
+        default=0
     )
     comms_count: int = Field(
         alias="absoluteStats_commsCount",
         description="Общее количество комментариев",
-        ge=0
+        ge=0,
+        default=0
     )
 
     last_updated_at: datetime = Field(
@@ -100,7 +107,8 @@ class AbsoluteStatsSchemaBase(ParentSchemaConfig):
     posts_count: int = Field(
         alias="absoluteStats_postsCount",
         description='Общее количество записей в группе',
-        ge=0
+        ge=0,
+        default=0
     )
 
     group_id: int = Field(description="Внешний ключ для связи с группой")

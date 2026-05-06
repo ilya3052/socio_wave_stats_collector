@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Any
@@ -68,7 +69,10 @@ class VKStat(Stat):
         }
 
     async def get_group(self):
-        groups = self._api.groups.getById(group_id=self._group_id, extended=1, fields="members_count")
+        loop = asyncio.get_event_loop()
+        groups = await loop.run_in_executor(
+            None, lambda: self._api.groups.getById(group_id=self._group_id, extended=1, fields="members_count")
+        )
         if not groups:
             return False
         self._group = groups[0]
@@ -88,10 +92,13 @@ class VKStat(Stat):
             offset = 0
             must_stop = False
             idx = 1
+            loop = asyncio.get_event_loop()
 
             while not must_stop:
-                items = self._api.wall.get(domain=self._screen_name, offset=offset, count=BATCH_SIZE).get(
-                    "items")
+                items = await loop.run_in_executor(
+                    None,
+                    lambda: self._api.wall.get(domain=self._screen_name, offset=offset, count=BATCH_SIZE).get("items")
+                )
 
                 if (_type := self._options.get('Type')) != Type.ABSOLUTE:
                     items = await _cut_off_excess_part(_type, items)
@@ -100,13 +107,13 @@ class VKStat(Stat):
 
                 if not items:
                     break
-
-                print(f'handle batch {idx}')
+                print(f'handle batch {idx} by group {self._screen_name} (ID {self._group_id})')
                 if not await self.handle_batch(items):
                     return False
-                idx += 1
 
+                idx += 1
                 offset += BATCH_SIZE
+
             return True
 
         except Exception as E:
@@ -127,8 +134,7 @@ class VKStat(Stat):
                 reposts_count = item.get("reposts", {}).get('count', 0)
                 views_count = item.get("views", {}).get('count', 0)
 
-                if 'additional' in self._options and self._options.get('additional') == 'update':
-                    await self._update_top_posts(item, likes_count, comments_count, reposts_count, views_count)
+                await self._update_top_posts(item, likes_count, comments_count, reposts_count, views_count)
 
                 self._comments_count += comments_count
                 self._likes_count += likes_count
@@ -166,6 +172,7 @@ class VKStat(Stat):
             }
 
     async def get_data(self):
+        print(self._top_posts)
         return {
             "Название группы": self._name,
             "External ID": self._group_id,

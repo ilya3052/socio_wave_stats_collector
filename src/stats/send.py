@@ -40,7 +40,6 @@ async def send_stats_to_db(stats, snapshot_type):
             views_count = stats.get('Просмотры', 0)
             participants_delta = stats.get('Подписчики', 0) - participants_count
             comms_count = stats.get('Комментарии', 0)
-            posts_count = stats.get('Количество записей', 0)
 
             snapshot_stats_schema = SnapshotStatsSchemaCreate.model_validate({
                 "repost_count": repost_count,
@@ -53,17 +52,6 @@ async def send_stats_to_db(stats, snapshot_type):
                 "coverage": 1
             })
             snapshot_stats_repo.add(SnapshotStatsModel(**snapshot_stats_schema.model_dump()))
-
-            abs_repo.update(abs_stats_instance.id, {
-                "repost_count": abs_stats_instance.repost_count + repost_count,
-                "likes_count": abs_stats_instance.likes_count + likes_count,
-                "views_count": abs_stats_instance.views_count + views_count,
-                "participants_count": stats.get('Подписчики', 0),
-                "comms_count": abs_stats_instance.comms_count + comms_count,
-                "posts_count": posts_count,
-                "last_updated_at": datetime.now()
-            })
-            abs_repo.commit()
             snapshot_repo.commit()
             snapshot_stats_repo.commit()
             logger.info(f"{snapshot_type.value} статистика успешно сохранена в БД для группы с ID {group_id}")
@@ -86,20 +74,21 @@ async def send_stats_to_db(stats, snapshot_type):
 async def send_absolute_stats_to_db(stats):
     try:
         with Session() as session:
-            logger.debug(f"Сохранение абсолютной статистики для группы с ID {stats.get('Internal ID')}")
+            group_id = stats.get('Internal ID')
+            logger.debug(f"Сохранение абсолютной статистики для группы с ID {group_id}")
 
             absolute_stats_repo = AbsoluteStatsRepository(session)
-            absolute_stats_schema = AbsoluteStatsSchemaCreate.model_validate({
+            absolute_stats_instance = absolute_stats_repo.get_by_group(group_id)
+            absolute_stats_repo.update(absolute_stats_instance.id, {
                 "likes_count": stats.get('Лайки'),
                 "views_count": stats.get('Просмотры'),
                 "participants_count": stats.get('Подписчики'),
                 "repost_count": stats.get('Репосты'),
                 "comms_count": stats.get('Комментарии'),
                 "posts_count": stats.get('Количество записей'),
-                "group_id": stats.get('Internal ID')
+                "last_updated_at": datetime.now(),
+                "group_id": group_id
             })
-            absolute_stats_instance = AbsoluteStatsModel(**absolute_stats_schema.model_dump())
-            absolute_stats_repo.add(absolute_stats_instance)
             absolute_stats_repo.commit()
 
             top_posts = stats.get('top_posts')
@@ -111,7 +100,7 @@ async def send_absolute_stats_to_db(stats):
                 "most_commented": top_posts.get('most_commented').get('id'),
                 "most_viewed": top_posts.get('most_viewed').get('id'),
                 "last_updated_at": datetime.now(),
-                "group_id": stats.get('internal_id')
+                "group_id": absolute_stats_instance.group_id
             })
             best_posts_instance = BestPostsModel(**best_posts_schema.model_dump())
             best_posts_repo.add(best_posts_instance)
