@@ -20,6 +20,10 @@ class Stat(ABC):
         pass
 
     @abstractmethod
+    async def _update_top_posts(self, item, likes_count, comments_count, reposts_count, views_count):
+        pass
+
+    @abstractmethod
     async def prepare_object(self):
         pass
 
