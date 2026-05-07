@@ -90,7 +90,7 @@ async def send_absolute_stats_to_db(stats):
                 "group_id": group_id
             })
             absolute_stats_repo.commit()
-
+            print(stats)
             top_posts = stats.get('top_posts')
 
             best_posts_repo = BestPostsRepository(session)

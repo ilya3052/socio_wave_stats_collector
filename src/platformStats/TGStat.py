@@ -138,8 +138,7 @@ class TGStat(Stat):
                 comments_count = item_stats[2]
                 reposts_count = item_stats[3]
 
-                if 'additional' in self._options and self._options.get('additional') == 'update':
-                    await self._update_top_posts(item, likes_count, comments_count, reposts_count, views_count)
+                await self._update_top_posts(item, likes_count, comments_count, reposts_count, views_count)
 
                 self._posts_count += 1
                 self._views += views_count
@@ -189,7 +188,8 @@ class TGStat(Stat):
             "Репосты": self._repost_count,
             "Просмотры": self._views,
             "Количество записей": self._posts_count,
-            'screen_name': self._screen_name
+            'screen_name': self._screen_name,
+            'top_posts': self._top_posts
         }
 
     async def prepare_object(self):
