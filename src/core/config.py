@@ -26,8 +26,8 @@ class SnapshotType(Enum):
 
 
 class Platforms(Enum):
-    VK = (1, 'vk')
-    TG = (2, 'tg')
+    VK = (2, 'vk')
+    TG = (1, 'tg')
 
     def __init__(self, code: int, alias: str):
         self.code = code
