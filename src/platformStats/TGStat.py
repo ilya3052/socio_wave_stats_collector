@@ -109,7 +109,7 @@ class TGStat(Stat):
                 batch.append(msg)
 
                 if len(batch) >= BATCH_SIZE:
-                    print(f'handle batch {idx}')
+                    print(f'handle batch {idx} by group {self._screen_name} (ID {self._group_id})')
                     if not await self.handle_batch(batch):
                         return False
                     idx += 1

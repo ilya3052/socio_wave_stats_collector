@@ -172,7 +172,6 @@ class VKStat(Stat):
             }
 
     async def get_data(self):
-        print(self._top_posts)
         return {
             "Название группы": self._name,
             "External ID": self._group_id,
