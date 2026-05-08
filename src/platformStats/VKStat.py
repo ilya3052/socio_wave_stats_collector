@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Any
@@ -48,8 +49,30 @@ class VKStat(Stat):
         self._time_for_handle = timedelta()
         self._posts_count = 0
 
+        self._top_posts = {
+            "most_liked": {
+                "id": 0,
+                "count": 0
+            },
+            "most_reposted": {
+                "id": 0,
+                "count": 0
+            },
+            "most_commented": {
+                "id": 0,
+                "count": 0
+            },
+            "most_viewed": {
+                "id": 0,
+                "count": 0
+            }
+        }
+
     async def get_group(self):
-        groups = self._api.groups.getById(group_id=self._group_id, extended=1, fields="members_count")
+        loop = asyncio.get_event_loop()
+        groups = await loop.run_in_executor(
+            None, lambda: self._api.groups.getById(group_id=self._group_id, extended=1, fields="members_count")
+        )
         if not groups:
             return False
         self._group = groups[0]
@@ -69,10 +92,13 @@ class VKStat(Stat):
             offset = 0
             must_stop = False
             idx = 1
+            loop = asyncio.get_event_loop()
 
             while not must_stop:
-                items = self._api.wall.get(domain=self._screen_name, offset=offset, count=BATCH_SIZE).get(
-                    "items")
+                items = await loop.run_in_executor(
+                    None,
+                    lambda: self._api.wall.get(domain=self._screen_name, offset=offset, count=BATCH_SIZE).get("items")
+                )
 
                 if (_type := self._options.get('Type')) != Type.ABSOLUTE:
                     items = await _cut_off_excess_part(_type, items)
@@ -81,13 +107,13 @@ class VKStat(Stat):
 
                 if not items:
                     break
-
-                print(f'handle batch {idx}')
+                print(f'handle batch {idx} by group {self._screen_name} (ID {self._group_id})')
                 if not await self.handle_batch(items):
                     return False
-                idx += 1
 
+                idx += 1
                 offset += BATCH_SIZE
+
             return True
 
         except Exception as E:
@@ -108,6 +134,8 @@ class VKStat(Stat):
                 reposts_count = item.get("reposts", {}).get('count', 0)
                 views_count = item.get("views", {}).get('count', 0)
 
+                await self._update_top_posts(item, likes_count, comments_count, reposts_count, views_count)
+
                 self._comments_count += comments_count
                 self._likes_count += likes_count
                 self._repost_count += reposts_count
@@ -121,6 +149,28 @@ class VKStat(Stat):
 
         return True
 
+    async def _update_top_posts(self, item, likes_count, comments_count, reposts_count, views_count):
+        if likes_count >= self._top_posts.get('most_liked').get('count'):
+            self._top_posts['most_liked'] = {
+                "id": item.get('id'),
+                "count": likes_count
+            }
+        if comments_count >= self._top_posts.get('most_reposted').get('count'):
+            self._top_posts['most_reposted'] = {
+                "id": item.get('id'),
+                "count": comments_count
+            }
+        if reposts_count >= self._top_posts.get('most_commented').get('count'):
+            self._top_posts['most_commented'] = {
+                "id": item.get('id'),
+                "count": reposts_count
+            }
+        if views_count >= self._top_posts.get('most_viewed').get('count'):
+            self._top_posts['most_viewed'] = {
+                "id": item.get('id'),
+                "count": views_count
+            }
+
     async def get_data(self):
         return {
             "Название группы": self._name,
@@ -130,7 +180,9 @@ class VKStat(Stat):
             "Комментарии": self._comments_count,
             "Репосты": self._repost_count,
             "Просмотры": self._views,
-            'screen_name': self._screen_name
+            "Количество записей": self._posts_count,
+            'screen_name': self._screen_name,
+            'top_posts': self._top_posts
         }
 
     async def prepare_object(self):

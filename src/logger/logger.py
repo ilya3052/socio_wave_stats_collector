@@ -5,6 +5,7 @@ from logging.config import dictConfig
 
 LOG_LEVEL = 'INFO'
 
+
 def get_log_file(log_type: str = 'system') -> str:
     log_type = log_type.lower()
     today = datetime.now().strftime("%Y-%m-%d")
@@ -40,47 +41,47 @@ class ConsoleFormatter(logging.Formatter):
 
 
 LOGGING_CONFIG = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "formatters": {
-            "standard": {
-                "()": ConsoleFormatter,
-                "format": "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d - %(message)s"
-            },
-            "file": {
-                "()": FileFormatter,
-                "format": "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d - %(message)s"
-            }
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "()": ConsoleFormatter,
+            "format": "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d - %(message)s"
         },
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "level": LOG_LEVEL,
-                "formatter": "standard",
-            },
-            "file": {
-                "class": "logging.handlers.RotatingFileHandler",
-                "level": LOG_LEVEL,
-                "formatter": "file",
-                "maxBytes": 10_485_760,
-                "backupCount": 5,
-                "encoding": "utf-8",
-                "delay": True,
-            },
-        },
-        "loggers": {
-            "": {
-                "handlers": ["console", "file"],
-                "level": LOG_LEVEL,
-                "propagate": False,
-            },
-            "src": {
-                "handlers": ["console", "file"],
-                "level": LOG_LEVEL,
-                "propagate": False,
-            },
+        "file": {
+            "()": FileFormatter,
+            "format": "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d - %(message)s"
         }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": LOG_LEVEL,
+            "formatter": "standard",
+        },
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": LOG_LEVEL,
+            "formatter": "file",
+            "maxBytes": 10_485_760,
+            "backupCount": 5,
+            "encoding": "utf-8",
+            "delay": True,
+        },
+    },
+    "loggers": {
+        "": {
+            "handlers": ["console", "file"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "src": {
+            "handlers": ["console", "file"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
     }
+}
 
 
 def configure_logging(log_type: str = 'system'):

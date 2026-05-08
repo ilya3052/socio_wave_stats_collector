@@ -3,7 +3,7 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import selectinload, joinedload
 
 from src.models import GroupModel, AbsoluteStatsModel, SnapshotModel, PlatformModel, ServiceAccountModel, \
-    ServiceAccountDataModel, SnapshotStatsModel
+    ServiceAccountDataModel, SnapshotStatsModel, BestPostsModel
 from .base import BaseRepository, T
 
 
@@ -13,6 +13,11 @@ class GroupsRepository(BaseRepository[GroupModel]):
 
     def get_groups_by_platform(self, platform_id):
         return self.session.scalars(select(self.model).filter_by(platform_id=platform_id)).all()
+
+
+class BestPostsRepository(BaseRepository[BestPostsModel]):
+    def __init__(self, session):
+        super().__init__(session, BestPostsModel)
 
 
 class AbsoluteStatsRepository(BaseRepository[AbsoluteStatsModel]):

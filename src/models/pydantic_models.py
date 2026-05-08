@@ -30,47 +30,85 @@ class GroupSchema(ParentSchemaConfig):
         description="Полная ссылка на группу"
     )
     added_at: date = Field(
-        alias="group_addedAt",
+        alias="group_added_at",
         le=date.today(),
         default=date.today()
     )
 
-    serviceAccount_id: int = Field(description="Внешний ключ для связи с сервисным аккаунтом")
+    service_account_id: int = Field(description="Внешний ключ для связи с сервисным аккаунтом")
     platform_id: int = Field(description="Внешний ключ для связи с записью платформы")
+
+
+class BestPostsSchema(ParentSchemaConfig):
+    most_liked: int = Field(
+        alias="best_post_most_liked",
+        description="Наиболее залайканный пост"
+    )
+    most_reposted: int = Field(
+        alias="best_post_most_reposted",
+        description="Наиболее репостнутый"
+    )
+    most_commented: int = Field(
+        alias="best_post_most_commented",
+        description="Наиболее комментируемый"
+    )
+    most_viewed: int = Field(
+        alias="best_post_most_viewed",
+        description="Наиболее просматриваемый"
+    )
+    last_updated_at: datetime = Field(
+        alias="best_post_added_at",
+        ge=date.today(),
+        default=date.today()
+    )
+
+    group_id: int = Field(description="Внешний ключ для связи с группой")
 
 
 class AbsoluteStatsSchemaBase(ParentSchemaConfig):
     likes_count: int = Field(
-        alias="absoluteStats_likesCount",
+        alias="absolute_stats_likes_count",
         description="Общее количество лайков",
-        ge=0
+        ge=0,
+        default=0
     )
     views_count: int = Field(
-        alias="absoluteStats_viewsCount",
+        alias="absolute_stats_views_count",
         description="Общее количество просмотров",
-        ge=0
+        ge=0,
+        default=0
     )
     participants_count: int = Field(
-        alias="absoluteStats_participantsCount",
+        alias="absolute_stats_participants_count",
         description="Общее количество просмотров",
-        ge=0
+        ge=0,
+        default=0
     )
     repost_count: int = Field(
-        alias="absoluteStats_repostCount",
+        alias="absolute_stats_repost_count",
         description="Общее количество репостов",
-        ge=0
+        ge=0,
+        default=0
     )
     comms_count: int = Field(
-        alias="absoluteStats_commsCount",
+        alias="absolute_stats_comms_count",
         description="Общее количество комментариев",
-        ge=0
+        ge=0,
+        default=0
     )
 
     last_updated_at: datetime = Field(
-        alias="absoluteStats_lastUpdatedAt",
+        alias="absolute_stats_last_updated_at",
         description="Время последнего обновления",
         le=datetime.now(),
         default=datetime.now()
+    )
+
+    posts_count: int = Field(
+        alias="absolute_stats_posts_count",
+        description='Общее количество записей в группе',
+        ge=0,
+        default=0
     )
 
     group_id: int = Field(description="Внешний ключ для связи с группой")
@@ -78,7 +116,7 @@ class AbsoluteStatsSchemaBase(ParentSchemaConfig):
 
 class AbsoluteStatsSchema(AbsoluteStatsSchemaBase):
     id: int = Field(
-        alias="absoluteStats_id",
+        alias="absolute_stats_id",
         description="Уникальный ID записи"
     )
 
@@ -115,30 +153,30 @@ class SnapshotSchemaCreate(SnapshotSchemaBase):
 
 class SnapshotStatsSchemaBase(ParentSchemaConfig):
     repost_count: int = Field(
-        alias="snapshotStats_repostCount",
+        alias="snapshot_stats_repost_count",
         description="Количество репостов в разнице с абсолютной статистиков",
         ge=0
     )
     likes_count: int = Field(
-        alias="snapshotStats_likesCount",
+        alias="snapshot_stats_likes_count",
         description="Количество лайков в разнице с абсолютной статистикой",
         ge=0
     )
     views_count: int = Field(
-        alias="snapshotStats_viewsCount",
+        alias="snapshot_stats_views_count",
         description="Количество просмотров в разнице с абсолютной статистикой",
         ge=0
     )
     participants_delta: int = Field(
-        alias="snapshotStats_participantsCount",
+        alias="snapshot_stats_participants_count",
         description="Количество просмотров в разнице с абсолютной статистикой",
     )
     coverage: int = Field(
-        alias="snapshotStats_coverage",
+        alias="snapshot_stats_coverage",
         description="Охваты"
     )
     comms_count: int = Field(
-        alias="snapshotStats_commsCount",
+        alias="snapshot_stats_comms_count",
         description="Общее количество комментариев",
         ge=0
     )
@@ -148,7 +186,7 @@ class SnapshotStatsSchemaBase(ParentSchemaConfig):
 
 class SnapshotStatsSchema(SnapshotStatsSchemaBase):
     id: int = Field(
-        alias="snapshotStats_id",
+        alias="snapshot_stats_id",
         description="Уникальный ID снапшота"
     )
 
@@ -177,11 +215,11 @@ class PlatformSchema(ParentSchemaConfig):
 
 class ServiceAccountSchema(ParentSchemaConfig):
     id: int = Field(
-        alias="serviceAccount_id",
+        alias="service_account_id",
         description="Уникальный ID сервисного аккаунта"
     )
     name: str = Field(
-        alias="serviceAccount_name",
+        alias="service_account_name",
         max_length=128,
         description="Имя сервисного аккаунта на платформе"
     )
@@ -189,46 +227,46 @@ class ServiceAccountSchema(ParentSchemaConfig):
     platform_id: int = Field(description="Внешний ключ для связи с платформой")
 
     app_id: Optional[int] = Field(
-        alias="serviceAccount_app_id",
+        alias="service_account_app_id",
         description="appID приложения ВК",
         default=None
     )
 
     is_activated: bool = Field(
-        alias="serviceAccount_is_activated",
+        alias="service_account_is_activated",
         description="Статус активации аккаунта"
     )
 
 
 class ServiceAccountDataSchema(ParentSchemaConfig):
     id: int = Field(
-        alias="serviceAccountData_id",
+        alias="service_accountData_id",
         description="Уникальный ID записи о данных сервисного аккаунта"
     )
     service_key: Optional[str] = Field(
-        alias="serviceAccountData_serviceKey",
+        alias="service_accountData_service_key",
         max_length=256,
         description="Сервисный ключ приложения ВК",
         default=None
     )
     protected_key: Optional[str] = Field(
-        alias="serviceAccountData_protectedKey",
+        alias="service_accountData_protected_key",
         max_length=256,
         description="Защищенный ключ приложения ВК",
         default=None
     )
     phone_number: Optional[str] = Field(
-        alias="serviceAccountData_phoneNumber",
+        alias="service_accountData_phone_number",
         min_length=11,
         max_length=11,
         description="Номер телефона аккаунта ТГ",
         default=None
     )
     session_path: Optional[str] = Field(
-        alias="serviceAccountData_sessionPath",
+        alias="service_accountData_session_path",
         max_length=256,
         description='Путь к файлу сессии аккаунта ТГ',
         default=None
     )
 
-    serviceAccount_id: int = Field(description="Внешний ключ для связи с данными сервисного аккаунта")
+    service_account_id: int = Field(description="Внешний ключ для связи с данными сервисного аккаунта")

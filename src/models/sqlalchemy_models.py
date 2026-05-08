@@ -45,20 +45,23 @@ class TypesMixin:
 
 
 class GroupModel(Base, TypesMixin):
-    __tablename__ = "groups"
+    __tablename__ = "social_entities_group"
     external_id: Mapped[int]
     name: Mapped[str_128]
     link: Mapped[str_256]
     added_at: Mapped[created_at]
-    serviceAccount_id: Mapped[int] = mapped_column(ForeignKey("serviceAccounts.id", ondelete='SET NULL'))
+    service_account_id: Mapped[int] = mapped_column(ForeignKey("service_accounts_serviceaccount.id", ondelete='SET NULL'))
     service_account: Mapped['ServiceAccountModel'] = relationship(
         back_populates='groups'
     )
-    platform_id: Mapped[int] = mapped_column(ForeignKey("platforms.id", ondelete="CASCADE"))
+    platform_id: Mapped[int] = mapped_column(ForeignKey("social_entities_platform.id", ondelete="CASCADE"))
     platform: Mapped['PlatformModel'] = relationship(back_populates='groups')
 
     stats: Mapped['AbsoluteStatsModel'] = relationship(
-        uselist=False,
+        back_populates='group'
+    )
+
+    best_posts: Mapped['BestPostsModel'] = relationship(
         back_populates='group'
     )
 
@@ -67,33 +70,46 @@ class GroupModel(Base, TypesMixin):
     )
 
 
+class BestPostsModel(Base, TypesMixin):
+    __tablename__ = "stats_bestposts"
+    most_liked: Mapped[int]
+    most_reposted: Mapped[int]
+    most_commented: Mapped[int]
+    most_viewed: Mapped[int]
+    last_updated_at: Mapped[updated_at]
+
+    group_id: Mapped[int] = mapped_column(ForeignKey("social_entities_group.id", ondelete="CASCADE"))
+    group: Mapped['GroupModel'] = relationship(back_populates='best_posts')
+
+
 class AbsoluteStatsModel(Base, TypesMixin):
-    __tablename__ = "absoluteStats"
+    __tablename__ = "stats_absolutestats"
     likes_count: Mapped[int]
     views_count: Mapped[int]
     participants_count: Mapped[int]
     repost_count: Mapped[int]
     comms_count: Mapped[int]
     last_updated_at: Mapped[updated_at]
-    group_id: Mapped[int] = mapped_column(ForeignKey("groups.id", ondelete='CASCADE'))
+    posts_count: Mapped[int]
+    group_id: Mapped[int] = mapped_column(ForeignKey("social_entities_group.id", ondelete='CASCADE'))
     group: Mapped['GroupModel'] = relationship(
         back_populates='stats'
     )
 
 
 class SnapshotModel(Base, TypesMixin):
-    __tablename__ = "snapshot"
+    __tablename__ = "stats_snapshot"
     repr_columns = ('id',)
     timestamp: Mapped[created_at]
     type: Mapped[SnapshotType]
-    group_id: Mapped[int] = mapped_column(ForeignKey("groups.id", ondelete='CASCADE'))
+    group_id: Mapped[int] = mapped_column(ForeignKey("social_entities_group.id", ondelete='CASCADE'))
     stats: Mapped['SnapshotStatsModel'] = relationship(
         back_populates='snapshot'
     )
 
 
 class SnapshotStatsModel(Base, TypesMixin):
-    __tablename__ = "snapshotStats"
+    __tablename__ = "stats_snapshotstats"
     repr_columns = ('id',)
     likes_count: Mapped[int]
     views_count: Mapped[int]
@@ -101,7 +117,7 @@ class SnapshotStatsModel(Base, TypesMixin):
     repost_count: Mapped[int]
     comms_count: Mapped[int]
     coverage: Mapped[int]
-    snapshot_id: Mapped[int] = mapped_column(ForeignKey("snapshot.id", ondelete="CASCADE"))
+    snapshot_id: Mapped[int] = mapped_column(ForeignKey("stats_snapshot.id", ondelete="CASCADE"))
     snapshot: Mapped['SnapshotModel'] = relationship(
         uselist=False,
         back_populates='stats'
@@ -109,7 +125,7 @@ class SnapshotStatsModel(Base, TypesMixin):
 
 
 class PlatformModel(Base, TypesMixin):
-    __tablename__ = "platforms"
+    __tablename__ = "social_entities_platform"
 
     name: Mapped[str_128]
     alias: Mapped[str_16]
@@ -118,10 +134,10 @@ class PlatformModel(Base, TypesMixin):
 
 
 class ServiceAccountModel(Base, TypesMixin):
-    __tablename__ = "serviceAccounts"
+    __tablename__ = "service_accounts_serviceaccount"
     name: Mapped[str_128]
 
-    platform_id: Mapped[int] = mapped_column(ForeignKey("platforms.id", ondelete="CASCADE"))
+    platform_id: Mapped[int] = mapped_column(ForeignKey("social_entities_platform.id", ondelete="CASCADE"))
     platform: Mapped['PlatformModel'] = relationship(
         back_populates='accounts'
     )
@@ -131,9 +147,8 @@ class ServiceAccountModel(Base, TypesMixin):
     is_activated: Mapped[bool] = mapped_column(server_default=text('false'))
 
     data: Mapped['ServiceAccountDataModel'] = relationship(
-
         uselist=False,
-        back_populates='serviceAccount'
+        back_populates='account'
     )
     groups: Mapped[list['GroupModel']] = relationship(
         back_populates='service_account'
@@ -141,12 +156,12 @@ class ServiceAccountModel(Base, TypesMixin):
 
 
 class ServiceAccountDataModel(Base, TypesMixin):
-    __tablename__ = "serviceAccountData"
+    __tablename__ = "service_accounts_serviceaccountdata"
 
     service_key: Mapped[Optional[str_256]]
     protected_key: Mapped[Optional[str_256]]
     phone_number: Mapped[Optional[str_11]]
     session_path: Mapped[Optional[str_256]]
 
-    serviceAccount_id: Mapped[int] = mapped_column(ForeignKey("serviceAccounts.id", ondelete='CASCADE'))
-    serviceAccount: Mapped['ServiceAccountModel'] = relationship(back_populates='data')
+    account_id: Mapped[int] = mapped_column(ForeignKey("service_accounts_serviceaccount.id", ondelete='CASCADE'))
+    account: Mapped['ServiceAccountModel'] = relationship(back_populates='data')

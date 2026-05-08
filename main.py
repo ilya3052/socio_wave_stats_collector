@@ -3,8 +3,9 @@ import logging
 import os
 import sys
 
-from sqlalchemy.exc import NoResultFound
 from pydantic import ValidationError
+from sqlalchemy.exc import NoResultFound
+
 from src.core import Platforms
 from src.core import Session, Type
 from src.exceptions import GroupsNotFoundError, GroupHandleError, SendingError
@@ -31,17 +32,17 @@ async def start_collecting_statistics(platform, _type):
 
         _platform = Platforms(platform)
         stats_type = Type(_type)
-
         accounts = await get_serv_accounts(_platform.id)
         logger.info(f"Найдено сервисных аккаунтов: {len(accounts)} (групп: {sum(len(acc.groups) for acc in accounts)})")
-
         options = {'platform': Platforms(platform), 'Type': stats_type}
+
 
         processing_tasks_result = await run_processing_tasks(accounts, **options)
         logger.info("Этап обработки статистики завершён")
 
         sending_tasks_result = await run_sending_tasks(processing_tasks_result, stats_type)
-        if not all(sending_tasks_result):
+        successful_sends = sum(1 for r in sending_tasks_result if not isinstance(r, Exception))
+        if not successful_sends:
             raise SendingError('Произошла ошибка при отправке данных в БД')
         logger.info("Сбор и отправка статистики завершены успешно")
 
@@ -54,16 +55,16 @@ def main():
     ИСПОЛЬЗОВАНИЕ
     main.py <command> [options]
 КОМАНДЫ
-    vk             Сбор статистики групп ВКонтакте
-    tg              Сбор статистики каналов Телеграм
+    vk                      Сбор статистики групп ВКонтакте
+    tg                      Сбор статистики каналов Телеграм
 ОПЦИИ
-    --absolute         Сбор полной статистики группы
-    --daily            Сбор статистики за последние сутки
-    --hourly          Сбор статистики за последние два часа
-    -ct --create-tables   Создание таблиц в базе
-    -h --help             Показать эту подсказку
+    --absolute              Сбор полной статистики группы
+    --daily                 Сбор статистики за последние сутки
+    --hourly                Сбор статистики за последние два часа
+    -ct --create-tables     Создание таблиц в базе
+    -h --help               Показать эту подсказку
 ПРИМЕРЫ
-    main.py vkontakte -a
+    main.py vk --absolute
     main.py --create-tables
     """
     try:

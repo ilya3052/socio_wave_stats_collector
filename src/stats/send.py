@@ -6,8 +6,8 @@ from sqlalchemy.exc import NoResultFound
 
 from src.core import Session
 from src.models import AbsoluteStatsSchema, SnapshotSchemaCreate, SnapshotModel, SnapshotStatsSchemaCreate, \
-    SnapshotStatsModel, AbsoluteStatsSchemaCreate, AbsoluteStatsModel
-from src.repositories import AbsoluteStatsRepository, SnapshotRepository, SnapshotStatsRepository
+    SnapshotStatsModel, AbsoluteStatsSchemaCreate, AbsoluteStatsModel, BestPostsSchema, BestPostsModel
+from src.repositories import AbsoluteStatsRepository, SnapshotRepository, SnapshotStatsRepository, BestPostsRepository
 
 logger = logging.getLogger(__name__)
 
@@ -52,16 +52,6 @@ async def send_stats_to_db(stats, snapshot_type):
                 "coverage": 1 # заменить название поля на ERR
             })
             snapshot_stats_repo.add(SnapshotStatsModel(**snapshot_stats_schema.model_dump()))
-
-            abs_repo.update(abs_stats_instance.id, {
-                "repost_count": abs_stats_instance.repost_count + repost_count,
-                "likes_count": abs_stats_instance.likes_count + likes_count,
-                "views_count": abs_stats_instance.views_count + views_count,
-                "participants_count": abs_stats_instance.participants_count + participants_delta,
-                "comms_count": abs_stats_instance.comms_count + comms_count,
-                "last_updated_at": datetime.now()
-            })
-            abs_repo.commit()
             snapshot_repo.commit()
             snapshot_stats_repo.commit()
             logger.info(f"{snapshot_type.value} статистика успешно сохранена в БД для группы с ID {group_id}")
@@ -84,20 +74,38 @@ async def send_stats_to_db(stats, snapshot_type):
 async def send_absolute_stats_to_db(stats):
     try:
         with Session() as session:
-            logger.debug(f"Сохранение абсолютной статистики для группы с ID {stats.get('Internal ID')}")
+            group_id = stats.get('Internal ID')
+            logger.debug(f"Сохранение абсолютной статистики для группы с ID {group_id}")
 
             absolute_stats_repo = AbsoluteStatsRepository(session)
-            absolute_stats_schema = AbsoluteStatsSchemaCreate.model_validate({
+            absolute_stats_instance = absolute_stats_repo.get_by_group(group_id)
+            absolute_stats_repo.update(absolute_stats_instance.id, {
                 "likes_count": stats.get('Лайки'),
                 "views_count": stats.get('Просмотры'),
                 "participants_count": stats.get('Подписчики'),
                 "repost_count": stats.get('Репосты'),
                 "comms_count": stats.get('Комментарии'),
-                "group_id": stats.get('Internal ID')
+                "posts_count": stats.get('Количество записей'),
+                "last_updated_at": datetime.now(),
+                "group_id": group_id
             })
-            absolute_stats_instance = AbsoluteStatsModel(**absolute_stats_schema.model_dump())
-            absolute_stats_repo.add(absolute_stats_instance)
             absolute_stats_repo.commit()
+            print(stats)
+            top_posts = stats.get('top_posts')
+
+            best_posts_repo = BestPostsRepository(session)
+            best_posts_schema = BestPostsSchema.model_validate({
+                "most_liked": top_posts.get('most_liked').get('id'),
+                "most_reposted": top_posts.get('most_reposted').get('id'),
+                "most_commented": top_posts.get('most_commented').get('id'),
+                "most_viewed": top_posts.get('most_viewed').get('id'),
+                "last_updated_at": datetime.now(),
+                "group_id": absolute_stats_instance.group_id
+            })
+            best_posts_instance = BestPostsModel(**best_posts_schema.model_dump())
+            best_posts_repo.add(best_posts_instance)
+            best_posts_repo.commit()
+
             logger.info(f"Абсолютная статистика успешно сохранена в БД для группы с ID {stats.get('Internal ID')}")
             return True
     except ValidationError as e:

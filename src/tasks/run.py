@@ -10,11 +10,24 @@ from .create import create_processing_tasks, create_sending_tasks
 logger = logging.getLogger(__name__)
 
 
-async def run_processing_tasks(accounts, **kwargs):
+async def run_processing_tasks(accounts, **options):
     try:
-        tasks = await create_processing_tasks(accounts, **kwargs)
+        tasks = await create_processing_tasks(accounts, **options)
         logger.info(f"Запуск {len(tasks)} задач обработки статистики")
-        return await asyncio.gather(*tasks, return_exceptions=False)
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        failed = 0
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.error(f"Задача {tasks[i].get_name()} упала с ошибкой: {result}")
+                failed += 1
+
+        if failed:
+            logger.warning(f"{failed} из {len(tasks)} задач завершились с ошибкой")
+        else:
+            logger.info(f"Все {len(tasks)} задач успешно завершены")
+
+        return results
     except (ValueError, GroupsNotFoundError, GroupHandleError):
         raise
     except Exception:
@@ -26,7 +39,20 @@ async def run_sending_tasks(stats_results, stats_type):
     try:
         tasks = await create_sending_tasks(stats_results, stats_type)
         logger.info(f"Запуск {len(tasks)} задач отправки статистики в БД")
-        return await asyncio.gather(*tasks, return_exceptions=False)
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        failed = 0
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.error(f"Задача {tasks[i].get_name()} упала с ошибкой: {result}")
+                failed += 1
+
+        if failed:
+            logger.warning(f"{failed} из {len(tasks)} задач завершились с ошибкой")
+        else:
+            logger.info(f"Все {len(tasks)} задач успешно завершены")
+
+        return results
     except ValidationError:
         raise
     except ValueError:
