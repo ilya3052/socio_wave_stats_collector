@@ -20,11 +20,13 @@ class Type(Enum):
     TOP = 'top'
     ABSOLUTE = 'absolute'
 
+
 class BestPostInfoType(Enum):
     MOST_LIKED = 'most_liked'
     MOST_REPOSTED = 'most_reposted'
     MOST_COMMENTED = 'most_commented'
     MOST_VIEWED = 'most_viewed'
+
 
 class SnapshotType(Enum):
     HOURLY = Type.HOURLY

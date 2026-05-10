@@ -1,16 +1,14 @@
 import logging
 from datetime import datetime
-from typing import Any
-from typing import Dict
 
-from icecream import ic
 from pydantic import ValidationError
 from sqlalchemy.exc import NoResultFound
 
 from src.core import Session
 from src.models import AbsoluteStatsSchema, SnapshotSchemaCreate, SnapshotModel, SnapshotStatsSchemaCreate, \
     SnapshotStatsModel, AbsoluteStatsModel, BestPostInfoSchemaCreate, BestPostInfoModel, GroupModel
-from src.repositories import AbsoluteStatsRepository, SnapshotRepository, SnapshotStatsRepository, BestPostsInfoRepository, GroupsRepository
+from src.repositories import AbsoluteStatsRepository, SnapshotRepository, SnapshotStatsRepository, \
+    BestPostsInfoRepository, GroupsRepository
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +50,7 @@ async def send_stats_to_db(stats, snapshot_type):
                 "comms_count": comms_count,
                 "snapshot_id": snapshot_id,
                 # "coverage": round(((likes_count + repost_count + comms_count) / views_count) * 100, 2) # заменить название поля на ERR
-                "coverage": 1 # заменить название поля на ERR
+                "coverage": 1  # заменить название поля на ERR
             })
             snapshot_stats_repo.add(SnapshotStatsModel(**snapshot_stats_schema.model_dump()))
             snapshot_repo.commit()
@@ -104,6 +102,7 @@ async def send_absolute_stats_to_db(stats):
             f"Неожиданная ошибка в send_absolute_stats_to_db для группы {stats.get('Internal ID', 'unknown')}")
         raise
 
+
 async def send_top_posts_stats_to_db(stats):
     try:
         with Session() as session:
@@ -118,7 +117,7 @@ async def send_top_posts_stats_to_db(stats):
             best_posts = best_posts_repo.get_by_group_id(internal_id)
 
             if best_posts:
-                for item, instance in zip(top_posts, best_posts): #type: str, BestPostInfoModel
+                for item, instance in zip(top_posts, best_posts):  # type: str, BestPostInfoModel
                     processed_item = top_posts[item]
                     best_posts_repo.update(instance.id, {
                         "likes_count": processed_item.get('likes_count'),
@@ -160,4 +159,3 @@ async def send_top_posts_stats_to_db(stats):
         logger.exception(
             f"Неожиданная ошибка в send_top_posts_stats_to_db для группы {stats.get('Internal ID', 'unknown')}")
         raise
-
