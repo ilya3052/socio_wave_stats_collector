@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Annotated, Optional
 
-from sqlalchemy import String, text, ForeignKey, UniqueConstraint
+from sqlalchemy import String, text, ForeignKey, UniqueConstraint, BigInteger
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from src.core import SnapshotType, BestPostInfoType
@@ -48,7 +48,7 @@ class TypesMixin:
 
 class GroupModel(Base, TypesMixin):
     __tablename__ = "social_entities_group"
-    external_id: Mapped[int]
+    external_id: Mapped[int] = mapped_column(BigInteger, index=True)
     name: Mapped[str_128]
     link: Mapped[str_256]
     added_at: Mapped[created_at]

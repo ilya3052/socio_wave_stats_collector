@@ -15,7 +15,6 @@ async def create_processing_tasks(accounts, **options):
         tasks: list[Task] = []
         platform = options.pop('platform')
         stats_type = options.get('Type')
-        print(stats_type)
         logger.info(
             f"Создание задач обработки для {len(accounts)} аккаунтов на платформе {platform.alias.upper()} (тип снапшота - {stats_type.value})")
 

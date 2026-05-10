@@ -8,7 +8,7 @@ from sqlalchemy.exc import NoResultFound
 
 from src.core import Platforms
 from src.core import Session, Type
-from src.exceptions import GroupsNotFoundError, GroupHandleError, SendingError
+from src.exceptions import GroupsNotFoundError, GroupHandleError, SendingError, NoSendingTaskCreated
 from src.logger import configure_logging
 from src.repositories import ServiceAccountRepository
 from src.tasks import run_processing_tasks, run_sending_tasks
@@ -41,9 +41,7 @@ async def start_collecting_statistics(platform, _type):
 
         sending_tasks_result = await run_sending_tasks(processing_tasks_result, stats_type)
         successful_sends = sum(1 for r in sending_tasks_result if not isinstance(r, Exception))
-        if not successful_sends:
-            raise SendingError('Произошла ошибка при отправке данных в БД')
-        logger.info("Сбор и отправка статистики завершены успешно")
+        logger.info(f"Успешно отправлено: {successful_sends} из {len(sending_tasks_result)}")
 
     except (ValidationError, ValueError, GroupsNotFoundError, GroupHandleError, NoResultFound, SendingError):
         raise
@@ -99,7 +97,7 @@ def main():
         logger.exception("НЕОБРАБОТАННОЕ ИСКЛЮЧЕНИЕ")
         print(e)
     else:
-        logger.info("main.py завершён без ошибок")
+        logger.info("Сбор статистики завершён")
 
 
 if __name__ == "__main__":
