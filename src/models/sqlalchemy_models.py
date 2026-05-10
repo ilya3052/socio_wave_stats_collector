@@ -48,7 +48,7 @@ class TypesMixin:
 
 class GroupModel(Base, TypesMixin):
     __tablename__ = "social_entities_group"
-    external_id: Mapped[int]
+    external_id: Mapped[int] = mapped_column(BigInteger, index=True)
     name: Mapped[str_128]
     link: Mapped[str_256]
     added_at: Mapped[created_at]
