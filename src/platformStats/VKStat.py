@@ -25,6 +25,12 @@ async def _cut_off_excess_part(_type, batch):
             date: datetime = datetime.fromtimestamp(publication_date)
             if date >= datetime.now() - timedelta(hours=2):
                 new_batch.append(item)
+    elif _type == Type.TOP:
+        for item in batch:
+            publication_date = item.get('date')
+            date: datetime = datetime.fromtimestamp(publication_date)
+            if date >= datetime.now() - timedelta(weeks=1):
+                new_batch.append(item)
     return new_batch
 
 
@@ -52,19 +58,19 @@ class VKStat(Stat):
         self._top_posts = {
             "most_liked": {
                 "id": 0,
-                "count": 0
+                "likes_count": 0
             },
             "most_reposted": {
                 "id": 0,
-                "count": 0
+                "reposts_count": 0
             },
             "most_commented": {
                 "id": 0,
-                "count": 0
+                "comms_count": 0
             },
             "most_viewed": {
                 "id": 0,
-                "count": 0
+                "views_count": 0
             }
         }
 
@@ -134,7 +140,9 @@ class VKStat(Stat):
                 reposts_count = item.get("reposts", {}).get('count', 0)
                 views_count = item.get("views", {}).get('count', 0)
 
-                await self._update_top_posts(item, likes_count, comments_count, reposts_count, views_count)
+                if (_type := self._options.get('Type')) == Type.TOP:
+                    await self._update_top_posts(item, likes_count, comments_count, reposts_count, views_count)
+                    continue
 
                 self._comments_count += comments_count
                 self._likes_count += likes_count
@@ -150,28 +158,49 @@ class VKStat(Stat):
         return True
 
     async def _update_top_posts(self, item, likes_count, comments_count, reposts_count, views_count):
-        if likes_count >= self._top_posts.get('most_liked').get('count'):
+        if likes_count >= self._top_posts.get('most_liked').get('likes_count'):
             self._top_posts['most_liked'] = {
                 "id": item.get('id'),
-                "count": likes_count
+                "likes_count": likes_count,
+                "comms_count": comments_count,
+                "reposts_count": reposts_count,
+                "views_count": views_count,
+                "content": item.get('text')[:150]
             }
-        if comments_count >= self._top_posts.get('most_reposted').get('count'):
+        if comments_count >= self._top_posts.get('most_reposted').get('reposts_count'):
             self._top_posts['most_reposted'] = {
                 "id": item.get('id'),
-                "count": comments_count
+                "likes_count": likes_count,
+                "comms_count": comments_count,
+                "reposts_count": reposts_count,
+                "views_count": views_count,
+                "content": item.get('text')[:150]
             }
-        if reposts_count >= self._top_posts.get('most_commented').get('count'):
+        if reposts_count >= self._top_posts.get('most_commented').get('comms_count'):
             self._top_posts['most_commented'] = {
                 "id": item.get('id'),
-                "count": reposts_count
+                "likes_count": likes_count,
+                "comms_count": comments_count,
+                "reposts_count": reposts_count,
+                "views_count": views_count,
+                "content": item.get('text')[:150]
             }
-        if views_count >= self._top_posts.get('most_viewed').get('count'):
+        if views_count >= self._top_posts.get('most_viewed').get('views_count'):
             self._top_posts['most_viewed'] = {
                 "id": item.get('id'),
-                "count": views_count
+                "likes_count": likes_count,
+                "comms_count": comments_count,
+                "reposts_count": reposts_count,
+                "views_count": views_count,
+                "content": item.get('text')[:150]
             }
 
     async def get_data(self):
+        if (_type := self._options.get('Type')) == Type.TOP:
+            return {
+                "External ID": self._group_id,
+                'top_posts': self._top_posts
+            }
         return {
             "Название группы": self._name,
             "External ID": self._group_id,
@@ -181,8 +210,7 @@ class VKStat(Stat):
             "Репосты": self._repost_count,
             "Просмотры": self._views,
             "Количество записей": self._posts_count,
-            'screen_name': self._screen_name,
-            'top_posts': self._top_posts
+            "screen_name": self._screen_name,
         }
 
     async def prepare_object(self):

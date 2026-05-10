@@ -4,7 +4,7 @@ from typing import Annotated, Optional
 from sqlalchemy import String, text, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from src.core import SnapshotType
+from src.core import SnapshotType, BestPostInfoType
 
 int_pk = Annotated[int, mapped_column(primary_key=True, autoincrement=True)]
 
@@ -16,6 +16,7 @@ today = Annotated[datetime, mapped_column(server_default=text("CURRENT_DATE"))]
 str_11 = Annotated[str, 11]
 str_16 = Annotated[str, 16]
 str_128 = Annotated[str, 128]
+str_150 = Annotated[str, 150]
 str_256 = Annotated[str, 256]
 str_512 = Annotated[str, 512]
 
@@ -39,6 +40,7 @@ class TypesMixin:
         str_11: String(11),
         str_16: String(16),
         str_128: String(128),
+        str_150: String(150),
         str_256: String(256),
         str_512: String(512)
     }
@@ -50,7 +52,8 @@ class GroupModel(Base, TypesMixin):
     name: Mapped[str_128]
     link: Mapped[str_256]
     added_at: Mapped[created_at]
-    service_account_id: Mapped[int] = mapped_column(ForeignKey("service_accounts_serviceaccount.id", ondelete='SET NULL'))
+    service_account_id: Mapped[int] = mapped_column(
+        ForeignKey("service_accounts_serviceaccount.id", ondelete='SET NULL'))
     service_account: Mapped['ServiceAccountModel'] = relationship(
         back_populates='groups'
     )
@@ -61,7 +64,7 @@ class GroupModel(Base, TypesMixin):
         back_populates='group'
     )
 
-    best_posts: Mapped['BestPostsModel'] = relationship(
+    best_posts: Mapped['BestPostInfoModel'] = relationship(
         back_populates='group'
     )
 
@@ -70,12 +73,16 @@ class GroupModel(Base, TypesMixin):
     )
 
 
-class BestPostsModel(Base, TypesMixin):
-    __tablename__ = "stats_bestposts"
-    most_liked: Mapped[int]
-    most_reposted: Mapped[int]
-    most_commented: Mapped[int]
-    most_viewed: Mapped[int]
+class BestPostInfoModel(Base, TypesMixin):
+    __tablename__ = "stats_bestpostinfo"
+    repr_columns = ('id', 'post_id', 'content',)
+    likes_count: Mapped[int]
+    reposts_count: Mapped[int]
+    comms_count: Mapped[int]
+    views_count: Mapped[int]
+    content: Mapped[str_150]
+    post_id: Mapped[int]
+    post_type: Mapped[BestPostInfoType]
     last_updated_at: Mapped[updated_at]
 
     group_id: Mapped[int] = mapped_column(ForeignKey("social_entities_group.id", ondelete="CASCADE"))

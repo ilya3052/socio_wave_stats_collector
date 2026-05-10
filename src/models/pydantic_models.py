@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, ConfigDict
 
-from src.core import SnapshotType
+from src.core import SnapshotType, BestPostInfoType
 
 
 class ParentSchemaConfig(BaseModel):
@@ -39,30 +39,56 @@ class GroupSchema(ParentSchemaConfig):
     platform_id: int = Field(description="Внешний ключ для связи с записью платформы")
 
 
-class BestPostsSchema(ParentSchemaConfig):
-    most_liked: int = Field(
-        alias="best_post_most_liked",
-        description="Наиболее залайканный пост"
+class BestPostInfoSchemaBase(ParentSchemaConfig):
+    likes_count: int = Field(
+        alias="bestpostinfo_likes_count",
+        description="Количество лайков записи"
     )
-    most_reposted: int = Field(
-        alias="best_post_most_reposted",
-        description="Наиболее репостнутый"
+    comms_count: int = Field(
+        alias="bestpostinfo_comms_count",
+        description="Количество комментариев записи"
     )
-    most_commented: int = Field(
-        alias="best_post_most_commented",
-        description="Наиболее комментируемый"
+    views_count: int = Field(
+        alias="bestpostinfo_views_count",
+        description="Количество просмотров записи"
     )
-    most_viewed: int = Field(
-        alias="best_post_most_viewed",
-        description="Наиболее просматриваемый"
+    reposts_count: int = Field(
+        alias="bestpostinfo_reposts_count",
+        description="Количество репостов записи"
     )
-    last_updated_at: datetime = Field(
-        alias="best_post_added_at",
-        ge=date.today(),
-        default=date.today()
+    content: str = Field(
+        alias="bestpostinfo_content",
+        description="Текст записи",
+        max_length=150
+    )
+    post_id: int = Field(
+        alias="bestpostinfo_post_id",
+        description="ID записи в группе"
+    )
+    post_type: BestPostInfoType = Field(
+        alias="bestpostinfo_type",
+        description="Признак поста"
     )
 
-    group_id: int = Field(description="Внешний ключ для связи с группой")
+    last_updated_at: datetime = Field(
+        alias="bestpostinfo_last_updated_at",
+        description="Время последнего обновления",
+        le=datetime.now(),
+        default=datetime.now()
+    )
+
+    group_id: int = Field(description="Внешний ключ для связи с записью группы")
+
+
+class BestPostInfoSchema(BestPostInfoSchemaBase):
+    id: int = Field(
+        alias="bestpostinfo_id",
+        description="Уникальный ID записи"
+    )
+
+
+class BestPostInfoSchemaCreate(BestPostInfoSchemaBase):
+    pass
 
 
 class AbsoluteStatsSchemaBase(ParentSchemaConfig):

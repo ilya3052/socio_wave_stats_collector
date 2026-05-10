@@ -6,8 +6,9 @@ from sqlalchemy.exc import NoResultFound
 
 from src.core import Session
 from src.models import AbsoluteStatsSchema, SnapshotSchemaCreate, SnapshotModel, SnapshotStatsSchemaCreate, \
-    SnapshotStatsModel, AbsoluteStatsSchemaCreate, AbsoluteStatsModel, BestPostsSchema, BestPostsModel
-from src.repositories import AbsoluteStatsRepository, SnapshotRepository, SnapshotStatsRepository, BestPostsRepository
+    SnapshotStatsModel, AbsoluteStatsModel, BestPostInfoSchemaCreate, BestPostInfoModel, GroupModel
+from src.repositories import AbsoluteStatsRepository, SnapshotRepository, SnapshotStatsRepository, \
+    BestPostsInfoRepository, GroupsRepository
 
 logger = logging.getLogger(__name__)
 
@@ -49,14 +50,13 @@ async def send_stats_to_db(stats, snapshot_type):
                 "comms_count": comms_count,
                 "snapshot_id": snapshot_id,
                 # "coverage": round(((likes_count + repost_count + comms_count) / views_count) * 100, 2) # заменить название поля на ERR
-                "coverage": 1 # заменить название поля на ERR
+                "coverage": 1  # заменить название поля на ERR
             })
             snapshot_stats_repo.add(SnapshotStatsModel(**snapshot_stats_schema.model_dump()))
             snapshot_repo.commit()
             snapshot_stats_repo.commit()
-            logger.info(f"{snapshot_type.value} статистика успешно сохранена в БД для группы с ID {group_id}")
-            return True
-
+        logger.info(f"{snapshot_type.value} статистика успешно сохранена в БД для группы с ID {group_id}")
+        return True
     except ValidationError as e:
         logger.error(
             f"Ошибка валидации при сохранении статистики для группы {stats.get('Internal ID', 'unknown')}: {e}")
@@ -90,24 +90,9 @@ async def send_absolute_stats_to_db(stats):
                 "group_id": group_id
             })
             absolute_stats_repo.commit()
-            print(stats)
-            top_posts = stats.get('top_posts')
 
-            best_posts_repo = BestPostsRepository(session)
-            best_posts_schema = BestPostsSchema.model_validate({
-                "most_liked": top_posts.get('most_liked').get('id'),
-                "most_reposted": top_posts.get('most_reposted').get('id'),
-                "most_commented": top_posts.get('most_commented').get('id'),
-                "most_viewed": top_posts.get('most_viewed').get('id'),
-                "last_updated_at": datetime.now(),
-                "group_id": absolute_stats_instance.group_id
-            })
-            best_posts_instance = BestPostsModel(**best_posts_schema.model_dump())
-            best_posts_repo.add(best_posts_instance)
-            best_posts_repo.commit()
-
-            logger.info(f"Абсолютная статистика успешно сохранена в БД для группы с ID {stats.get('Internal ID')}")
-            return True
+        logger.info(f"Абсолютная статистика успешно сохранена в БД для группы с ID {stats.get('Internal ID')}")
+        return True
     except ValidationError as e:
         logger.error(
             f"Ошибка валидации при сохранении абсолютной статистики для группы {stats.get('Internal ID', 'unknown')}: {e}")
@@ -115,4 +100,62 @@ async def send_absolute_stats_to_db(stats):
     except Exception as e:
         logger.exception(
             f"Неожиданная ошибка в send_absolute_stats_to_db для группы {stats.get('Internal ID', 'unknown')}")
+        raise
+
+
+async def send_top_posts_stats_to_db(stats):
+    try:
+        with Session() as session:
+            group_id = stats.get('External ID')
+            top_posts = stats.get('top_posts')
+
+            groups_repo = GroupsRepository(session)
+            group: GroupModel = groups_repo.get_by_external_id(group_id)
+            internal_id = group.id
+
+            best_posts_repo = BestPostsInfoRepository(session)
+            best_posts = best_posts_repo.get_by_group_id(internal_id)
+
+            if best_posts:
+                for item, instance in zip(top_posts, best_posts):  # type: str, BestPostInfoModel
+                    processed_item = top_posts[item]
+                    best_posts_repo.update(instance.id, {
+                        "likes_count": processed_item.get('likes_count'),
+                        "comms_count": processed_item.get('comms_count'),
+                        "views_count": processed_item.get('views_count'),
+                        "reposts_count": processed_item.get('reposts_count'),
+                        "content": processed_item.get('content'),
+                        "post_id": processed_item.get('id'),
+                        "post_type": item.upper(),
+                        "group_id": internal_id,
+                        "last_updated_at": datetime.now()
+                    })
+                best_posts_repo.commit()
+                return True
+
+            for item in top_posts:
+                processed_item = top_posts[item]
+                best_posts_schema = BestPostInfoSchemaCreate.model_validate({
+                    "likes_count": processed_item.get('likes_count'),
+                    "comms_count": processed_item.get('comms_count'),
+                    "views_count": processed_item.get('views_count'),
+                    "reposts_count": processed_item.get('reposts_count'),
+                    "content": processed_item.get('content'),
+                    "post_id": processed_item.get('id'),
+                    "post_type": item,
+                    "group_id": internal_id
+                })
+                best_posts_instance = BestPostInfoModel(**best_posts_schema.model_dump())
+                best_posts_repo.add(best_posts_instance)
+            best_posts_repo.commit()
+
+        logger.info(f"Обновленный недельный топ постов в БД для группы с ID {stats.get('Internal ID')} сохранен")
+        return True
+    except ValidationError as e:
+        logger.error(
+            f"Ошибка валидации при сохранении недельного топа постов для группы {stats.get('Internal ID', 'unknown')}: {e}")
+        raise
+    except Exception as e:
+        logger.exception(
+            f"Неожиданная ошибка в send_top_posts_stats_to_db для группы {stats.get('Internal ID', 'unknown')}")
         raise

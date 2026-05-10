@@ -17,7 +17,15 @@ BATCH_SIZE = 100
 class Type(Enum):
     DAILY = 'daily'
     HOURLY = 'hourly'
+    TOP = 'top'
     ABSOLUTE = 'absolute'
+
+
+class BestPostInfoType(Enum):
+    MOST_LIKED = 'most_liked'
+    MOST_REPOSTED = 'most_reposted'
+    MOST_COMMENTED = 'most_commented'
+    MOST_VIEWED = 'most_viewed'
 
 
 class SnapshotType(Enum):
@@ -26,8 +34,8 @@ class SnapshotType(Enum):
 
 
 class Platforms(Enum):
-    VK = (2, 'vk')
-    TG = (1, 'tg')
+    VK = (1, 'vk')
+    TG = (2, 'tg')
 
     def __init__(self, code: int, alias: str):
         self.code = code
