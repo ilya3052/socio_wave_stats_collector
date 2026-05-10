@@ -144,6 +144,8 @@ class TGStat(Stat):
                 comments_count = item_stats[2]
                 reposts_count = item_stats[3]
 
+                self._posts_count += 1
+                
                 if (_type := self._options.get('Type')) == Type.TOP:
                     await self._update_top_posts(item, likes_count, comments_count, reposts_count, views_count)
                     continue
