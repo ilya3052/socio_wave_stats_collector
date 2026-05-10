@@ -36,7 +36,6 @@ async def start_collecting_statistics(platform, _type):
         logger.info(f"Найдено сервисных аккаунтов: {len(accounts)} (групп: {sum(len(acc.groups) for acc in accounts)})")
         options = {'platform': Platforms(platform), 'Type': stats_type}
 
-
         processing_tasks_result = await run_processing_tasks(accounts, **options)
         logger.info("Этап обработки статистики завершён")
 
@@ -59,6 +58,7 @@ def main():
     tg                      Сбор статистики каналов Телеграм
 ОПЦИИ
     --absolute              Сбор полной статистики группы
+    --top                   Обновление недельного топа постов
     --daily                 Сбор статистики за последние сутки
     --hourly                Сбор статистики за последние два часа
     -ct --create-tables     Создание таблиц в базе
