@@ -2,6 +2,7 @@ import logging
 from datetime import timedelta, datetime, date, timezone
 from typing import Any, Dict, Optional, Set
 
+from icecream import ic
 from telethon import TelegramClient
 from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.types import Channel, InputChannel, ChatFull, Message, PeerChannel
@@ -51,19 +52,19 @@ class TGStat(Stat):
         self._top_posts = {
             "most_liked": {
                 "id": 0,
-                "count": 0
+                "likes_count": 0
             },
             "most_reposted": {
                 "id": 0,
-                "count": 0
+                "reposts_count": 0
             },
             "most_commented": {
                 "id": 0,
-                "count": 0
+                "comms_count": 0
             },
             "most_viewed": {
                 "id": 0,
-                "count": 0
+                "views_count": 0
             }
         }
 
@@ -90,15 +91,21 @@ class TGStat(Stat):
 
             offset: Optional[datetime | date | timedelta] = None
             end_period: Optional[datetime | date] = None
-            if (_type := self._options.get('Type')) == Type.DAILY:
+            _type = self._options.get('Type')
+
+            if _type == Type.DAILY:
                 offset = (datetime.now(timezone.utc) - timedelta(days=1)).date()
                 end_period = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
             elif _type == Type.HOURLY:
                 offset = (datetime.now(timezone.utc) - timedelta(hours=2)).replace(minute=0, second=0, microsecond=0)
                 end_period = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
+            elif _type == Type.TOP:
+                offset = (datetime.now(timezone.utc) - timedelta(weeks=1)).date()
+                end_period = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
 
             async for msg in self._api.iter_messages(self._channel, reverse=True, offset_date=offset,
                                                      wait_time=1.2):  # type: Message
+
                 if (offset and end_period) and msg.date >= end_period:
                     break
 
@@ -138,7 +145,9 @@ class TGStat(Stat):
                 comments_count = item_stats[2]
                 reposts_count = item_stats[3]
 
-                await self._update_top_posts(item, likes_count, comments_count, reposts_count, views_count)
+                if (_type := self._options.get('Type')) == Type.TOP:
+                    await self._update_top_posts(item, likes_count, comments_count, reposts_count, views_count)
+                    continue
 
                 self._posts_count += 1
                 self._views += views_count
@@ -154,31 +163,55 @@ class TGStat(Stat):
         return True
 
     async def _update_top_posts(self, item: Message, likes_count, comments_count, reposts_count, views_count):
-        if likes_count >= self._top_posts.get('most_liked').get('count'):
+        if likes_count >= self._top_posts.get('most_liked').get('likes_count'):
             self._top_posts['most_liked'] = {
                 "id": item.id,
-                "count": likes_count
+                "likes_count": likes_count,
+                "comms_count": comments_count,
+                "reposts_count": reposts_count,
+                "views_count": views_count,
+                "content": item.message[:150]
             }
-        if comments_count >= self._top_posts.get('most_reposted').get('count'):
+        if reposts_count >= self._top_posts.get('most_reposted').get('reposts_count'):
             self._top_posts['most_reposted'] = {
                 "id": item.id,
-                "count": comments_count
+                "likes_count": likes_count,
+                "comms_count": comments_count,
+                "reposts_count": reposts_count,
+                "views_count": views_count,
+                "content": item.message[:150]
             }
-        if reposts_count >= self._top_posts.get('most_commented').get('count'):
+        if comments_count >= self._top_posts.get('most_commented').get('comms_count'):
             self._top_posts['most_commented'] = {
                 "id": item.id,
-                "count": reposts_count
+                "likes_count": likes_count,
+                "comms_count": comments_count,
+                "reposts_count": reposts_count,
+                "views_count": views_count,
+                "content": item.message[:150]
             }
-        if views_count >= self._top_posts.get('most_viewed').get('count'):
+        if views_count >= self._top_posts.get('most_viewed').get('views_count'):
             self._top_posts['most_viewed'] = {
                 "id": item.id,
-                "count": views_count
+                "likes_count": likes_count,
+                "comms_count": comments_count,
+                "reposts_count": reposts_count,
+                "views_count": views_count,
+                "content": item.message[:150]
             }
 
     async def get_service_data(self):
         return self._posts_count
 
     async def get_data(self):
+        if (_type := self._options.get('Type')) == Type.TOP:
+            return {
+                "Название группы": self._name,
+                "External ID": self._group_id,
+                "Количество записей": self._posts_count,
+                'screen_name': self._screen_name,
+                'top_posts': self._top_posts
+            }
         return {
             "Название группы": self._name,
             "External ID": self._group_id,
@@ -189,7 +222,6 @@ class TGStat(Stat):
             "Просмотры": self._views,
             "Количество записей": self._posts_count,
             'screen_name': self._screen_name,
-            'top_posts': self._top_posts
         }
 
     async def prepare_object(self):
