@@ -15,6 +15,11 @@ async def handle_tg_group(api, group, **options):
     try:
         if not await stat.prepare_object():
             raise GroupHandleError(f'Не удалось подготовить объект группы {group.name} (TG)')
+        if await stat.get_service_data() == 0 and options.get('Type') == Type.TOP:
+            raise NoRecordsFound(
+                f"Для группы {group.name} (TG) за последнюю неделю не найдено ни одной записи, пропускаем")
+    except NoRecordsFound:
+        raise
     except Exception as e:
         logger.exception(f"Критическая ошибка обработки группы TG {group.name} с ID {group.external_id}")
         raise GroupHandleError(f'Произошла ошибка при обработке группы {group.name} на платформе TG') from e
