@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Annotated, Optional
 
-from sqlalchemy import String, text, ForeignKey, UniqueConstraint
+from sqlalchemy import String, text, ForeignKey, UniqueConstraint, BigInteger
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from src.core import SnapshotType, BestPostInfoType

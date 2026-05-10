@@ -8,3 +8,9 @@ class GroupHandleError(Exception):
 
 class SendingError(Exception):
     pass
+
+class NoRecordsFound(Exception):
+    pass
+
+class NoSendingTaskCreated(Exception):
+    pass

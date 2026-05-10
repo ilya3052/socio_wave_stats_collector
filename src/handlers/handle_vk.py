@@ -2,7 +2,8 @@ import logging
 from datetime import datetime
 from typing import Dict
 
-from src.exceptions import GroupHandleError
+from src.core import Type
+from src.exceptions import GroupHandleError, NoRecordsFound
 from src.platformStats import VKStat
 
 logger = logging.getLogger(__name__)
