@@ -41,6 +41,7 @@ async def send_stats_to_db(stats, snapshot_type):
             views_count = stats.get('Просмотры', 0)
             participants_delta = stats.get('Подписчики', 0) - participants_count
             comms_count = stats.get('Комментарии', 0)
+            posts_count = stats.get('Количество записей', 0)
 
             snapshot_stats_schema = SnapshotStatsSchemaCreate.model_validate({
                 "repost_count": repost_count,
@@ -59,6 +60,7 @@ async def send_stats_to_db(stats, snapshot_type):
                 "views_count": abs_stats_instance.views_count + views_count,
                 "participants_count": abs_stats_instance.participants_count + participants_delta,
                 "comms_count": abs_stats_instance.comms_count + comms_count,
+                "posts_count": abs_stats_instance.posts_count + posts_count,
                 "last_updated_at": datetime.now()
             })
             abs_repo.commit()
