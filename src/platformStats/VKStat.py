@@ -3,11 +3,12 @@ import logging
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Any
 
+from icecream import ic
 from vk_api.vk_api import VkApiMethod
 
 from src.core import BATCH_SIZE, Type
 from .StatABS import Stat
-
+import re
 logger = logging.getLogger(__name__)
 
 
@@ -74,6 +75,8 @@ class VKStat(Stat):
             }
         }
 
+        self._posts_data = {}
+
     async def get_group(self):
         loop = asyncio.get_event_loop()
         groups = await loop.run_in_executor(
@@ -136,15 +139,58 @@ class VKStat(Stat):
                 self._posts_count += 1
 
                 likes_count = item.get('likes', {}).get('count', 0)
-                comments_count = item.get("comments", {}).get('count', 0)
+                comms_count = item.get("comments", {}).get('count', 0)
                 reposts_count = item.get("reposts", {}).get('count', 0)
                 views_count = item.get("views", {}).get('count', 0)
 
+                media = item.get('attachments')
+                has_video = False
+                has_photo = False
+                for m in media:
+                    if m.get('type') == 'photo' and not has_photo:
+                        has_photo = True
+                        continue
+                    if m.get('type') == 'video' and not has_video:
+                        has_video = True
+                        continue
+
+                if self._options.get('Type') == Type.DAILY:
+                    date = item.get('date')
+                    hour = datetime.fromtimestamp(date).hour
+                    day_of_week = datetime.fromtimestamp(date).weekday()
+
+                    text = item.get('text')
+                    text = re.sub(r'(\d)\s+(\d)', r'\1-\2', text)
+                    text_clean = re.sub(r'[^\w\s-]', '', text)
+
+                    self._posts_data[str(item.get('id'))] = {
+                        "likes_count": likes_count,
+                        "comms_count": comms_count,
+                        "reposts_count": reposts_count,
+                        "views_count": views_count,
+                        "hour": hour,
+                        "day_of_week": day_of_week,
+                        "is_weekend": day_of_week >= 5,
+                        "is_night": hour < 6 or hour >= 22,
+                        "is_prime_time": 18 <= hour < 23,
+                        "has_text": bool('text' in item),
+                        "has_media": bool(item.get('attachments')),
+                        "text_length": len(text),
+
+                        "is_morning": 6 <= hour < 10,
+                        "is_lunch": 12 <= hour <= 14,
+                        "like_view_ratio": likes_count / views_count,
+                        "er": round(((likes_count + reposts_count + comms_count) / views_count), 4),
+                        "has_video": has_video,
+                        "has_photo": has_photo,
+                        "word_count": len(text_clean.split())
+                    }
+
                 if (_type := self._options.get('Type')) == Type.TOP:
-                    await self._update_top_posts(item, likes_count, comments_count, reposts_count, views_count)
+                    await self._update_top_posts(item, likes_count, comms_count, reposts_count, views_count)
                     continue
 
-                self._comments_count += comments_count
+                self._comments_count += comms_count
                 self._likes_count += likes_count
                 self._repost_count += reposts_count
                 self._views += views_count
@@ -201,7 +247,7 @@ class VKStat(Stat):
                 "External ID": self._group_id,
                 'top_posts': self._top_posts
             }
-        return {
+        data = {
             "Название группы": self._name,
             "External ID": self._group_id,
             "Подписчики": self._participants_count,
@@ -210,8 +256,12 @@ class VKStat(Stat):
             "Репосты": self._repost_count,
             "Просмотры": self._views,
             "Количество записей": self._posts_count,
-            "screen_name": self._screen_name,
+            "screen_name": self._screen_name
         }
+        if _type == Type.DAILY:
+            data['additional_data'] = self._posts_data
+
+        return data
 
     async def prepare_object(self):
         if not await self.get_group():
