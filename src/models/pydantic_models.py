@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from decimal import Decimal
 from typing import Optional
 
 from pydantic import BaseModel, Field, ConfigDict
@@ -199,7 +200,7 @@ class SnapshotStatsSchemaBase(ParentSchemaConfig):
     )
     ERR: Decimal = Field(
         alias="snapshot_stats_err",
-        description="Охваты"
+        description="ERR"
     )
     comms_count: int = Field(
         alias="snapshot_stats_comms_count",
@@ -296,3 +297,92 @@ class ServiceAccountDataSchema(ParentSchemaConfig):
     )
 
     service_account_id: int = Field(description="Внешний ключ для связи с данными сервисного аккаунта")
+
+
+class PostMetricsSchemaBase(ParentSchemaConfig):
+    post_id: int = Field(
+        alias="stats_postmetrics_post_id",
+        description="ID поста в группе для которого собираются метрики"
+    )
+    likes_count: int = Field(
+        alias="stats_postmetrics_likes_count",
+        description="Количество лайков поста"
+    )
+    views_count: int = Field(
+        alias="stats_postmetrics_views_count",
+        description="Количество просмотров поста"
+    )
+    reposts_count: int = Field(
+        alias="stats_postmetrics_repost_count",
+        description="Количество репостов поста"
+    )
+    comms_count: int = Field(
+        alias="stats_postmetrics_comms_count",
+        description="Количество комментариев поста"
+    )
+    hour: int = Field(
+        alias="stats_postmetrics_hour",
+        description="Час публикации"
+    )
+    day_of_week: int = Field(
+        alias="stats_postmetrics_day_of_week",
+        description="День публикации"
+    )
+    is_weekend: bool = Field(
+        alias="stats_postmetrics_is_weekend",
+        description="Признак публикации в выходной день"
+    )
+    is_night: bool = Field(
+        alias="stats_postmetrics_is_night",
+        description="Признак публикации ночью"
+    )
+    is_prime_time: bool = Field(
+        alias="stats_postmetrics_is_prime_time",
+        description="Признак публикации вечером"
+    )
+    has_text: bool = Field(
+        alias="stats_postmetrics_has_text",
+        description="Признак наличия текста в посте"
+    )
+    text_length: int = Field(
+        alias="stats_postmetrics_text_length",
+        description="Длина текста поста"
+    )
+    is_morning: bool = Field(
+        alias="stats_postmetrics_is_morning",
+        description="Признак публикации утром"
+    )
+    is_lunch: bool = Field(
+        alias="stats_postmetrics_is_lunch",
+        description="Признак публикации в обед"
+    )
+    like_view_ratio: float = Field(
+        alias="stats_postmetrics_like_view_ratio",
+        description="Соотношение лайков к просмотрам"
+    )
+    er: float = Field(
+        alias="stats_postmetrics_er",
+        description="Соотношение всех показателей к просмотрам"
+    )
+    has_video: bool = Field(
+        alias="stats_postmetrics_has_video",
+        description="Признак наличия видео в посте"
+    )
+    has_photo: bool = Field(
+        alias="stats_postmetrics_has_photo",
+        description="Признак наличия фото в посте"
+    )
+    word_count: int = Field(
+        alias="stats_postmetrics_word_count",
+        description="Количество слов в посте"
+    )
+
+    group_id: int = Field(description="Внешний ключ для связи с группой")
+    timestamp: datetime = Field(alias="stats_postmetrics_timestamp", default=datetime.now())
+
+
+class PostMetricsSchema(PostMetricsSchemaBase):
+    id: int = Field(alias="", description="")
+
+class PostMetricsSchemaCreate(PostMetricsSchemaBase):
+    pass
