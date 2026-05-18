@@ -1,10 +1,11 @@
 import logging
 from datetime import timedelta, datetime, date, timezone
 from typing import Any, Dict, Optional, Set
-
+import re
 from telethon import TelegramClient
 from telethon.tl.functions.channels import GetFullChannelRequest
-from telethon.tl.types import Channel, InputChannel, ChatFull, Message, PeerChannel
+from telethon.tl.types import Channel, InputChannel, ChatFull, Message, PeerChannel, MessageMediaPhoto, \
+    MessageMediaDocument
 
 from src.core import BATCH_SIZE, Type
 from .StatABS import Stat
@@ -47,6 +48,8 @@ class TGStat(Stat):
 
         self._seen_groups: Set = set()
         self._posts_count = 0
+
+        self._posts_data = {}
 
         self._top_posts = {
             "most_liked": {
@@ -93,19 +96,23 @@ class TGStat(Stat):
             _type = self._options.get('Type')
 
             if _type == Type.DAILY:
-                offset = (datetime.now(timezone.utc) - timedelta(days=1)).date()
-                end_period = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+                offset = (datetime.now() - timedelta(days=1)).date()
+                end_period = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
             elif _type == Type.HOURLY:
-                offset = (datetime.now(timezone.utc) - timedelta(hours=2)).replace(minute=0, second=0, microsecond=0)
-                end_period = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
+                offset = (datetime.now() - timedelta(hours=2)).replace(minute=0, second=0, microsecond=0)
+                end_period = datetime.now().replace(minute=0, second=0, microsecond=0)
             elif _type == Type.TOP:
-                offset = (datetime.now(timezone.utc) - timedelta(weeks=1)).date()
-                end_period = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+                offset = (datetime.now() - timedelta(weeks=1)).date()
+                end_period = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
             async for msg in self._api.iter_messages(self._channel, reverse=True, offset_date=offset,
                                                      wait_time=1.2):  # type: Message
 
-                if (offset and end_period) and msg.date >= end_period:
+                msg_date = msg.date
+                if msg_date.tzinfo is not None:
+                    msg_date = msg_date.replace(tzinfo=None)
+
+                if (offset and end_period) and msg_date >= end_period:
                     break
 
                 if grouped_id := msg.grouped_id:
@@ -135,24 +142,59 @@ class TGStat(Stat):
         for item in batch:  # type: Message
             if not isinstance(item, Message):
                 continue
-
             try:
                 item_stats = await get_item_stats(item)
 
                 views_count = item_stats[0]
                 likes_count = item_stats[1]
-                comments_count = item_stats[2]
+                comms_count = item_stats[2]
                 reposts_count = item_stats[3]
+                has_photo = isinstance(item.media, MessageMediaPhoto)
+                has_video = isinstance(item.media, MessageMediaDocument) and item.media.video
 
                 self._posts_count += 1
 
+                if self._options.get('Type') == Type.DAILY:
+                    date = item.date
+                    if item.date.tzinfo is not None:
+                        date = item.date.replace(tzinfo=None) + timedelta(hours=3)
+                    hour = date.hour
+                    day_of_week = date.weekday()
+
+                    text = item.message
+                    text = re.sub(r'(\d)\s+(\d)', r'\1-\2', text)
+                    text_clean = re.sub(r'[^\w\s-]', '', text)
+                    self._posts_data[str(item.id)] = {
+                        "likes_count": likes_count,
+                        "comms_count": comms_count,
+                        "reposts_count": reposts_count,
+                        "views_count": views_count,
+                        "hour": hour,
+                        "day_of_week": day_of_week,
+                        "is_weekend": day_of_week >= 5,
+                        "is_night": hour < 6 or hour >= 22,
+                        "is_prime_time": 18 <= hour < 23,
+                        "has_text": bool(getattr(item, 'text', None)),
+                        "has_media": bool(item.media),
+                        "text_length": len(item.message),
+
+                        "is_morning": 6 <= hour < 10,
+                        "is_lunch": 12 <= hour <= 14,
+                        "like_view_ratio": likes_count / views_count,
+                        "er": round(((likes_count + reposts_count + comms_count) / views_count), 4),
+                        "has_video": has_video,
+                        "has_photo": has_photo,
+                        # "media_count": len(media),
+                        "word_count": len(text_clean.split())
+                    }
+
                 if (_type := self._options.get('Type')) == Type.TOP:
-                    await self._update_top_posts(item, likes_count, comments_count, reposts_count, views_count)
+                    await self._update_top_posts(item, likes_count, comms_count, reposts_count, views_count)
                     continue
 
                 self._views += views_count
                 self._likes_count += likes_count
-                self._comments_count += comments_count
+                self._comments_count += comms_count
                 self._repost_count += reposts_count
             except Exception as e:
                 post_id = item.id or 'unknown'
@@ -212,7 +254,7 @@ class TGStat(Stat):
                 'screen_name': self._screen_name,
                 'top_posts': self._top_posts
             }
-        return {
+        data = {
             "Название группы": self._name,
             "External ID": self._group_id,
             "Подписчики": self._participants_count,
@@ -221,8 +263,12 @@ class TGStat(Stat):
             "Репосты": self._repost_count,
             "Просмотры": self._views,
             "Количество записей": self._posts_count,
-            'screen_name': self._screen_name,
+            "screen_name": self._screen_name
         }
+        if _type == Type.DAILY:
+            data['additional_data'] = self._posts_data
+
+        return data
 
     async def prepare_object(self):
         if not await self.get_group():
