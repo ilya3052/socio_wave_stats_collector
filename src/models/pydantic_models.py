@@ -197,8 +197,8 @@ class SnapshotStatsSchemaBase(ParentSchemaConfig):
         alias="snapshot_stats_participants_count",
         description="Количество просмотров в разнице с абсолютной статистикой",
     )
-    coverage: int = Field(
-        alias="snapshot_stats_coverage",
+    ERR: Decimal = Field(
+        alias="snapshot_stats_err",
         description="Охваты"
     )
     comms_count: int = Field(
