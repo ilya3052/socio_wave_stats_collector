@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from typing import Annotated, Optional
 
 from sqlalchemy import String, text, ForeignKey, UniqueConstraint, BigInteger
@@ -68,6 +69,10 @@ class GroupModel(Base, TypesMixin):
         back_populates='group'
     )
 
+    post_metrics: Mapped['PostMetricsModel'] = relationship(
+        back_populates='group'
+    )
+
     __table_args__ = (
         UniqueConstraint("platform_id", "external_id", name="uq_group_platform_external"),
     )
@@ -123,7 +128,7 @@ class SnapshotStatsModel(Base, TypesMixin):
     participants_delta: Mapped[int]
     repost_count: Mapped[int]
     comms_count: Mapped[int]
-    coverage: Mapped[int]
+    ERR: Mapped[Decimal]
     snapshot_id: Mapped[int] = mapped_column(ForeignKey("stats_snapshot.id", ondelete="CASCADE"))
     snapshot: Mapped['SnapshotModel'] = relationship(
         uselist=False,
@@ -172,3 +177,31 @@ class ServiceAccountDataModel(Base, TypesMixin):
 
     account_id: Mapped[int] = mapped_column(ForeignKey("service_accounts_serviceaccount.id", ondelete='CASCADE'))
     account: Mapped['ServiceAccountModel'] = relationship(back_populates='data')
+
+class PostMetricsModel(Base, TypesMixin):
+    __tablename__ = "stats_postmetrics"
+
+    post_id: Mapped[int]
+    likes_count: Mapped[int]
+    views_count: Mapped[int]
+    reposts_count: Mapped[int]
+    comms_count: Mapped[int]
+    hour: Mapped[int]
+    day_of_week: Mapped[int]
+    is_weekend: Mapped[bool]
+    is_night: Mapped[bool]
+    is_prime_time: Mapped[bool]
+    has_text: Mapped[bool]
+    text_length: Mapped[int]
+    is_morning: Mapped[bool]
+    is_lunch: Mapped[bool]
+    like_view_ratio: Mapped[float]
+    er: Mapped[float]
+    has_video: Mapped[bool]
+    has_photo: Mapped[bool]
+    word_count: Mapped[int]
+
+    timestamp: Mapped[datetime]
+
+    group_id: Mapped[int] = mapped_column(ForeignKey("social_entities_group.id", ondelete='CASCADE'))
+    group: Mapped['GroupModel'] = relationship(back_populates='post_metrics')
