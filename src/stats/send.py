@@ -6,9 +6,10 @@ from sqlalchemy.exc import NoResultFound
 
 from src.core import Session
 from src.models import AbsoluteStatsSchema, SnapshotSchemaCreate, SnapshotModel, SnapshotStatsSchemaCreate, \
-    SnapshotStatsModel, AbsoluteStatsModel, BestPostInfoSchemaCreate, BestPostInfoModel, GroupModel
+    SnapshotStatsModel, AbsoluteStatsModel, BestPostInfoSchemaCreate, BestPostInfoModel, GroupModel, \
+    PostMetricsSchemaCreate, PostMetricsModel
 from src.repositories import AbsoluteStatsRepository, SnapshotRepository, SnapshotStatsRepository, \
-    BestPostsInfoRepository, GroupsRepository
+    BestPostsInfoRepository, GroupsRepository, PostMetricsRepository
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ async def send_stats_to_db(stats, snapshot_type):
             snapshot_repo = SnapshotRepository(session)
             snapshot_schema = SnapshotSchemaCreate.model_validate({
                 "type": snapshot_type,
-                "group_id": stats.get('Internal ID')
+                "group_id": group_id
             })
             snapshot_instance = SnapshotModel(**snapshot_schema.model_dump())
 
@@ -42,7 +43,9 @@ async def send_stats_to_db(stats, snapshot_type):
             participants_delta = stats.get('Подписчики', 0) - participants_count
             comms_count = stats.get('Комментарии', 0)
             posts_count = stats.get('Количество записей', 0)
-
+            err = 0
+            if views_count > 0:
+                err = round(((likes_count + repost_count + comms_count) / views_count), 4)
             snapshot_stats_schema = SnapshotStatsSchemaCreate.model_validate({
                 "repost_count": repost_count,
                 "likes_count": likes_count,
@@ -50,8 +53,7 @@ async def send_stats_to_db(stats, snapshot_type):
                 "participants_delta": participants_delta,
                 "comms_count": comms_count,
                 "snapshot_id": snapshot_id,
-                # "coverage": round(((likes_count + repost_count + comms_count) / views_count) * 100, 2) # заменить название поля на ERR
-                "coverage": 1  # заменить название поля на ERR
+                "ERR": err # заменить название поля на ERR
             })
             snapshot_stats_repo.add(SnapshotStatsModel(**snapshot_stats_schema.model_dump()))
             abs_repo.update(abs_stats_instance.id, {
@@ -63,9 +65,46 @@ async def send_stats_to_db(stats, snapshot_type):
                 "posts_count": abs_stats_instance.posts_count + posts_count,
                 "last_updated_at": datetime.now()
             })
-            abs_repo.commit()
-            snapshot_repo.commit()
-            snapshot_stats_repo.commit()
+
+            if 'additional_data' not in stats:
+                abs_repo.commit()
+                snapshot_repo.commit()
+                snapshot_stats_repo.commit()
+                logger.info(f"{snapshot_type.value} статистика успешно сохранена в БД для группы с ID {group_id}")
+                return True
+
+            metrics_repo = PostMetricsRepository(session)
+            additional_data = stats.get('additional_data')
+            for data in additional_data:
+                post = additional_data[data]
+                metrics_schema = PostMetricsSchemaCreate.model_validate({
+                    'post_id': data,
+                    'likes_count': post.get('likes_count'),
+                    'comms_count': post.get('comms_count'),
+                    'reposts_count': post.get('reposts_count'),
+                    'views_count': post.get('views_count'),
+                    'hour': post.get('hour'),
+                    'day_of_week': post.get('day_of_week'),
+                    'is_weekend': post.get('is_weekend'),
+                    'is_night': post.get('is_night'),
+                    'is_prime_time': post.get('is_prime_time'),
+                    'has_text': post.get('has_text'),
+                    'text_length': post.get('text_length'),
+                    'group_id': group_id,
+                    "timestamp": datetime.now(),
+
+                    "is_morning": post.get("is_morning"),
+                    "is_lunch": post.get("is_lunch"),
+                    "like_view_ratio": post.get("like_view_ratio"),
+                    "er": post.get("er"),
+                    "has_video": post.get("has_video"),
+                    "has_photo": post.get("has_photo"),
+                    "word_count": post.get('word_count')
+                })
+                metrics_instance = PostMetricsModel(**metrics_schema.model_dump())
+                metrics_repo.add(metrics_instance)
+            metrics_repo.commit()
+
         logger.info(f"{snapshot_type.value} статистика успешно сохранена в БД для группы с ID {group_id}")
         return True
     except ValidationError as e:
