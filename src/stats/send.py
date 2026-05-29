@@ -53,7 +53,7 @@ async def send_stats_to_db(stats, snapshot_type):
                 "participants_delta": participants_delta,
                 "comms_count": comms_count,
                 "snapshot_id": snapshot_id,
-                "ERR": err # заменить название поля на ERR
+                "ERR": err
             })
             snapshot_stats_repo.add(SnapshotStatsModel(**snapshot_stats_schema.model_dump()))
             abs_repo.update(abs_stats_instance.id, {
@@ -86,17 +86,11 @@ async def send_stats_to_db(stats, snapshot_type):
                     'hour': post.get('hour'),
                     'day_of_week': post.get('day_of_week'),
                     'is_weekend': post.get('is_weekend'),
-                    'is_night': post.get('is_night'),
-                    'is_prime_time': post.get('is_prime_time'),
-                    'has_text': post.get('has_text'),
                     'text_length': post.get('text_length'),
                     'group_id': group_id,
                     "timestamp": datetime.now(),
 
-                    "is_morning": post.get("is_morning"),
-                    "is_lunch": post.get("is_lunch"),
                     "like_view_ratio": post.get("like_view_ratio"),
-                    "er": post.get("er"),
                     "has_video": post.get("has_video"),
                     "has_photo": post.get("has_photo"),
                     "word_count": post.get('word_count')
