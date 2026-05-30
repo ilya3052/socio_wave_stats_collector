@@ -167,8 +167,8 @@ class VKStat(Stat):
                 "views_count": views_count,
                 "content": item.get('text')[:150]
             }
-        if comments_count >= self._top_posts.get('most_reposted').get('reposts_count'):
-            self._top_posts['most_reposted'] = {
+        if comments_count >= self._top_posts.get('most_commented').get('comms_count'):
+            self._top_posts['most_commented'] = {
                 "id": item.get('id'),
                 "likes_count": likes_count,
                 "comms_count": comments_count,
@@ -176,8 +176,8 @@ class VKStat(Stat):
                 "views_count": views_count,
                 "content": item.get('text')[:150]
             }
-        if reposts_count >= self._top_posts.get('most_commented').get('comms_count'):
-            self._top_posts['most_commented'] = {
+        if reposts_count >= self._top_posts.get('most_reposted').get('reposts_count'):
+            self._top_posts['most_reposted'] = {
                 "id": item.get('id'),
                 "likes_count": likes_count,
                 "comms_count": comments_count,
