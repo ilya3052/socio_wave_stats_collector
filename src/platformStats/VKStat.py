@@ -197,23 +197,25 @@ class VKStat(Stat):
         return True
 
     async def _update_top_posts(self, item, likes_count, comments_count, reposts_count, views_count):
-        if likes_count >= self._top_posts.get('most_liked').get('likes_count'):
-            self._top_posts['most_liked'] = {
+        content = item.get('text')
+        content = content[:147] + '...' if len(content) > 150 else content
+        if comments_count >= self._top_posts.get('most_commented').get('comms_count'):
+            self._top_posts['most_commented'] = {
                 "id": item.get('id'),
                 "likes_count": likes_count,
                 "comms_count": comments_count,
                 "reposts_count": reposts_count,
                 "views_count": views_count,
-                "content": item.get('text')[:150]
+                "content": content
             }
-        if comments_count >= self._top_posts.get('most_reposted').get('reposts_count'):
+        if reposts_count >= self._top_posts.get('most_reposted').get('reposts_count'):
             self._top_posts['most_reposted'] = {
                 "id": item.get('id'),
                 "likes_count": likes_count,
                 "comms_count": comments_count,
                 "reposts_count": reposts_count,
                 "views_count": views_count,
-                "content": item.get('text')[:150]
+                "content": content
             }
         if reposts_count >= self._top_posts.get('most_commented').get('comms_count'):
             self._top_posts['most_commented'] = {
@@ -222,7 +224,7 @@ class VKStat(Stat):
                 "comms_count": comments_count,
                 "reposts_count": reposts_count,
                 "views_count": views_count,
-                "content": item.get('text')[:150]
+                "content": content
             }
         if views_count >= self._top_posts.get('most_viewed').get('views_count'):
             self._top_posts['most_viewed'] = {
@@ -231,7 +233,7 @@ class VKStat(Stat):
                 "comms_count": comments_count,
                 "reposts_count": reposts_count,
                 "views_count": views_count,
-                "content": item.get('text')[:150]
+                "content": content
             }
 
     async def get_data(self):
