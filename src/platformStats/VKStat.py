@@ -3,12 +3,12 @@ import logging
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Any
 
-from icecream import ic
 from vk_api.vk_api import VkApiMethod
 
 from src.core import BATCH_SIZE, Type
 from .StatABS import Stat
 import re
+
 logger = logging.getLogger(__name__)
 
 
