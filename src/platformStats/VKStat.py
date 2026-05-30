@@ -199,6 +199,15 @@ class VKStat(Stat):
     async def _update_top_posts(self, item, likes_count, comments_count, reposts_count, views_count):
         content = item.get('text')
         content = content[:147] + '...' if len(content) > 150 else content
+        if likes_count >= self._top_posts.get('most_liked').get('likes_count'):
+            self._top_posts['most_liked'] = {
+                "id": item.get('id'),
+                "likes_count": likes_count,
+                "comms_count": comments_count,
+                "reposts_count": reposts_count,
+                "views_count": views_count,
+                "content": content
+            }
         if comments_count >= self._top_posts.get('most_commented').get('comms_count'):
             self._top_posts['most_commented'] = {
                 "id": item.get('id'),
@@ -210,15 +219,6 @@ class VKStat(Stat):
             }
         if reposts_count >= self._top_posts.get('most_reposted').get('reposts_count'):
             self._top_posts['most_reposted'] = {
-                "id": item.get('id'),
-                "likes_count": likes_count,
-                "comms_count": comments_count,
-                "reposts_count": reposts_count,
-                "views_count": views_count,
-                "content": content
-            }
-        if reposts_count >= self._top_posts.get('most_commented').get('comms_count'):
-            self._top_posts['most_commented'] = {
                 "id": item.get('id'),
                 "likes_count": likes_count,
                 "comms_count": comments_count,
