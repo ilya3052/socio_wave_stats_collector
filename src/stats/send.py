@@ -133,7 +133,7 @@ async def send_absolute_stats_to_db(stats):
                 "last_updated_at": datetime.now(),
                 "group_id": group_id
             })
-            absolute_stats_repo.commit()
+            session.commit()
 
         logger.info(f"Абсолютная статистика успешно сохранена в БД для группы с ID {stats.get('Internal ID')}")
         return True
