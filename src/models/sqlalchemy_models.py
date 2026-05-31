@@ -53,6 +53,7 @@ class GroupModel(Base, TypesMixin):
     name: Mapped[str_128]
     link: Mapped[str_256]
     added_at: Mapped[created_at]
+    status: Mapped[str_128]
     service_account_id: Mapped[int] = mapped_column(
         ForeignKey("service_accounts_serviceaccount.id", ondelete='SET NULL'))
     service_account: Mapped['ServiceAccountModel'] = relationship(
