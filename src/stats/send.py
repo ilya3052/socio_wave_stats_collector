@@ -121,6 +121,10 @@ async def send_absolute_stats_to_db(stats):
             group_id = stats.get('Internal ID')
             logger.debug(f"Сохранение абсолютной статистики для группы с ID {group_id}")
 
+            group_repo = GroupsRepository(session)
+            group = group_repo.get(group_id)
+            group.status = 'SUCCESS'
+
             absolute_stats_repo = AbsoluteStatsRepository(session)
             absolute_stats_instance = absolute_stats_repo.get_by_group(group_id)
             absolute_stats_repo.update(absolute_stats_instance.id, {
