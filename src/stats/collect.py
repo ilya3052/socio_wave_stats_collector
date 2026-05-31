@@ -22,7 +22,8 @@ async def collect_vk_stats(api, groups, **options):
                 continue
             except GroupHandleError as GHE:
                 # TODO: сделать отправку уведомления для админа
-                logger.error(f"Сбор статистики для группы '{group.name}' (VK) упал с ошибкой: {GHE}. Подробнее см. в логах")
+                logger.error(
+                    f"Сбор статистики для группы '{group.name}' (VK) упал с ошибкой: {GHE}. Подробнее см. в логах")
                 stats.append(GHE)
                 continue
             stats.append(group_stats)
@@ -48,7 +49,8 @@ async def collect_tg_stats(api, groups, **options):
                 continue
             except GroupHandleError as GHE:
                 # TODO: сделать отправку уведомления для админа
-                logger.error(f"Сбор статистики для группы '{group.name}' (TG) упал с ошибкой: {GHE}. Подробнее см. в логах")
+                logger.error(
+                    f"Сбор статистики для группы '{group.name}' (TG) упал с ошибкой: {GHE}. Подробнее см. в логах")
                 stats.append(GHE)
                 continue
             stats.append(group_stats)

@@ -362,5 +362,6 @@ class PostMetricsSchemaBase(ParentSchemaConfig):
 class PostMetricsSchema(PostMetricsSchemaBase):
     id: int = Field(alias="", description="")
 
+
 class PostMetricsSchemaCreate(PostMetricsSchemaBase):
     pass
