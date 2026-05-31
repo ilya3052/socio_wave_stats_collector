@@ -67,9 +67,7 @@ async def send_stats_to_db(stats, snapshot_type):
             })
 
             if 'additional_data' not in stats:
-                abs_repo.commit()
-                snapshot_repo.commit()
-                snapshot_stats_repo.commit()
+                session.commit()
                 logger.info(f"{snapshot_type.value} статистика успешно сохранена в БД для группы с ID {group_id}")
                 return True
 
@@ -97,7 +95,7 @@ async def send_stats_to_db(stats, snapshot_type):
                 })
                 metrics_instance = PostMetricsModel(**metrics_schema.model_dump())
                 metrics_repo.add(metrics_instance)
-            metrics_repo.commit()
+            session.commit()
 
         logger.info(f"{snapshot_type.value} статистика успешно сохранена в БД для группы с ID {group_id}")
         return True
@@ -178,7 +176,7 @@ async def send_top_posts_stats_to_db(stats):
                         "group_id": internal_id,
                         "last_updated_at": datetime.now()
                     })
-                best_posts_repo.commit()
+                session.commit()
                 return True
 
             for item in top_posts:
@@ -195,7 +193,7 @@ async def send_top_posts_stats_to_db(stats):
                 })
                 best_posts_instance = BestPostInfoModel(**best_posts_schema.model_dump())
                 best_posts_repo.add(best_posts_instance)
-            best_posts_repo.commit()
+            session.commit()
 
         logger.info(f"Обновленный недельный топ постов в БД для группы с ID {stats.get('Internal ID')} сохранен")
         return True
