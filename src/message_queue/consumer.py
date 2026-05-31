@@ -37,4 +37,5 @@ async def process_message(message: AbstractIncomingMessage):
 async def start_consumer():
     channel = await get_channel()
     queue = await channel.declare_queue("abs-stats", durable=True)
+    await channel.set_qos(prefetch_count=1)
     await queue.consume(process_message)
