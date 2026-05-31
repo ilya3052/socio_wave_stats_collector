@@ -1,7 +1,10 @@
+import asyncio
 import os
 from enum import Enum
 from typing import Union
 
+import aio_pika
+from aio_pika.exceptions import ChannelInvalidStateError
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,6 +13,11 @@ API_ID = os.getenv("API_ID")
 API_HASH = os.getenv("API_HASH")
 
 KEY = os.getenv('ENCRYPTION_KEY')
+
+RABBITMQ_URL = os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost/")
+
+SPECIAL_VK_ACC_SERVICE_KEY = os.getenv("SPECIAL_VK_ACC_SERVICE_KEY")
+SPECIAL_TG_ACC_SESSION_PATH = os.getenv("SPECIAL_TG_ACC_SESSION_PATH")
 
 BATCH_SIZE = 100
 
@@ -62,3 +70,41 @@ class Platforms(Enum):
 
     def __int__(self) -> int:
         return self.code
+
+_connection: aio_pika.abc.AbstractRobustConnection | None = None
+_channel: aio_pika.abc.AbstractChannel | None = None
+_lock = asyncio.Lock()
+
+
+async def get_channel() -> aio_pika.abc.AbstractChannel:
+    global _connection, _channel
+
+    async with _lock:
+        if _connection is None or _connection.is_closed:
+            _connection = await aio_pika.connect_robust(
+                RABBITMQ_URL, heartbeat=60,
+            )
+            _channel = None
+
+        if _channel is None or _channel.is_closed:
+            try:
+                _channel = await _connection.channel()
+            except ChannelInvalidStateError:
+                _channel = None
+                _connection = None
+                return await get_channel()
+
+            await _channel.declare_queue("abs-stats", durable=True)
+
+    return _channel
+
+
+async def close_rabbitmq():
+    global _connection, _channel
+    async with _lock:
+        if _channel is not None and not _channel.is_closed:
+            await _channel.close()
+            _channel = None
+        if _connection is not None and not _connection.is_closed:
+            await _connection.close()
+            _connection = None
