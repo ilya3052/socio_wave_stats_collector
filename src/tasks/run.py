@@ -39,7 +39,8 @@ async def run_sending_tasks(stats_results, stats_type):
     try:
         tasks = await create_sending_tasks(stats_results, stats_type)
         if not tasks:
-            logger.warning(f"Задачи отправки не созданы - все группы пропущены или упали с ошибками. Подробнее см. в логах")
+            logger.warning(
+                f"Задачи отправки не созданы - все группы пропущены или упали с ошибками. Подробнее см. в логах")
             return []
         logger.info(f"Запуск {len(tasks)} задач отправки статистики в БД")
         results = await asyncio.gather(*tasks, return_exceptions=True)

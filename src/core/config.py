@@ -71,6 +71,7 @@ class Platforms(Enum):
     def __int__(self) -> int:
         return self.code
 
+
 _connection: aio_pika.abc.AbstractRobustConnection | None = None
 _channel: aio_pika.abc.AbstractChannel | None = None
 _lock = asyncio.Lock()

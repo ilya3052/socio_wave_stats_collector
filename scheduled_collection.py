@@ -8,7 +8,7 @@ from sqlalchemy.exc import NoResultFound
 
 from src.core import Platforms
 from src.core import Session, Type
-from src.exceptions import GroupsNotFoundError, GroupHandleError, SendingError, NoSendingTaskCreated
+from src.exceptions import GroupsNotFoundError, GroupHandleError, SendingError
 from src.logger import configure_logging
 from src.repositories import ServiceAccountRepository
 from src.tasks import run_processing_tasks, run_sending_tasks

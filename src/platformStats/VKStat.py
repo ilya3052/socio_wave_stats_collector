@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import re
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Any
 
@@ -7,7 +8,6 @@ from vk_api.vk_api import VkApiMethod
 
 from src.core import BATCH_SIZE, Type
 from .StatABS import Stat
-import re
 
 logger = logging.getLogger(__name__)
 
