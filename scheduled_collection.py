@@ -32,6 +32,9 @@ async def start_collecting_statistics(platform, _type):
 
         _platform = Platforms(platform)
         stats_type = Type(_type)
+        if stats_type == Type.ABSOLUTE:
+            logger.error('Неверно указан тип собираемой статистики')
+            raise ValueError('Неверно указан тип собираемой статистики')
         accounts = await get_serv_accounts(_platform.id)
         logger.info(f"Найдено сервисных аккаунтов: {len(accounts)} (групп: {sum(len(acc.groups) for acc in accounts)})")
         options = {'platform': Platforms(platform), 'Type': stats_type}
@@ -47,7 +50,7 @@ async def start_collecting_statistics(platform, _type):
         raise
 
 
-def main():
+def scheduled_collection():
     """
     ИСПОЛЬЗОВАНИЕ
     main.py <command> [options]
@@ -55,19 +58,18 @@ def main():
     vk                      Сбор статистики групп ВКонтакте
     tg                      Сбор статистики каналов Телеграм
 ОПЦИИ
-    --absolute              Сбор полной статистики группы
     --top                   Обновление недельного топа постов
     --daily                 Сбор статистики за последние сутки
     --hourly                Сбор статистики за последние два часа
     -ct --create-tables     Создание таблиц в базе
     -h --help               Показать эту подсказку
 ПРИМЕРЫ
-    main.py vk --absolute
+    main.py vk --daily
     main.py --create-tables
     """
     try:
         if len(sys.argv) == 1 or sys.argv[1].lstrip('-') in ('h', 'help'):
-            print(main.__doc__)
+            print(scheduled_collection.__doc__)
             sys.exit(0)
 
         if sys.argv[1].lstrip('-') in ('create-tables', 'ct'):
@@ -101,4 +103,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    scheduled_collection()
