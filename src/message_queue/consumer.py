@@ -28,7 +28,7 @@ async def process_message(message: AbstractIncomingMessage):
             group: GroupModel = group_repo.get(group_data.get('group_id'))
             group.status = 'COLLECTING'
             session.commit()
-        platform = Platforms(group.platform.alias)
+            platform = Platforms(group.platform.alias)
         api = get_api(platform)
         stats = await collect_stats(api=api, groups=[group], platform=platform, **{'Type': Type.ABSOLUTE})
         await send_absolute_stats_to_db(stats[0])
