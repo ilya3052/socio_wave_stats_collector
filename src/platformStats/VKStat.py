@@ -285,4 +285,3 @@ class VKStat(Stat):
             'max_reposts': self.max_repost_count,
             'posts_stats': self.posts_stats,
         }
-        # return self._posts_count, self.m

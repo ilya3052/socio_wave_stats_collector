@@ -160,7 +160,7 @@ class TGStat(Stat):
                 self.max_repost_count = max(reposts_count, self.max_repost_count)
                 self.max_comment_count = max(comms_count, self.max_comment_count)
                 self.posts_stats[item.id] = {'likes': likes_count, 'comments': comms_count,
-                                                    'reposts': reposts_count}
+                                             'reposts': reposts_count}
 
                 has_photo = isinstance(item.media, MessageMediaPhoto)
                 has_video = isinstance(item.media, MessageMediaDocument) and item.media.video

@@ -12,6 +12,7 @@ from src.stats import collect_stats, send_absolute_stats_to_db
 
 logger = logging.getLogger(__name__)
 
+
 def get_api(platform):
     api = None
     if platform == Platforms.TG:
