@@ -23,9 +23,9 @@ async def create_processing_tasks(accounts, **options):
         for idx, (account, api) in enumerate(zip(accounts, apis), 1):
             groups = account.groups
             if not groups:
-                logger.error(
+                logger.warning(
                     f"GroupsNotFoundError для сервисного аккаунта с ID {account.id} (платформа {platform.alias})")
-                raise GroupsNotFoundError('Произошла ошибка при получении групп для сервисного аккаунта')
+                # raise GroupsNotFoundError('Произошла ошибка при получении групп для сервисного аккаунта')
 
             if not api:
                 logger.error(f"Не удалось получить API для аккаунта с ID {account.id} (платформа {platform.alias})")
