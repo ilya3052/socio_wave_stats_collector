@@ -40,6 +40,11 @@ class GroupSchema(ParentSchemaConfig):
     platform_id: int = Field(description="Внешний ключ для связи с записью платформы")
 
 
+class AggregatedStats(Base, TypesMixin):
+    post_data: dict = Field(alias="predictive_models_params", description="Параметры модели в формате JSON")
+    group_id: int = Field(description="Внешний ключ для связи с группой")
+
+
 class BestPostInfoSchemaBase(ParentSchemaConfig):
     likes_count: int = Field(
         alias="bestpostinfo_likes_count",

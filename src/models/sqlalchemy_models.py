@@ -1,6 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Dict
 
 from sqlalchemy import String, text, ForeignKey, UniqueConstraint, BigInteger
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -77,6 +77,12 @@ class GroupModel(Base, TypesMixin):
     __table_args__ = (
         UniqueConstraint("platform_id", "external_id", name="uq_group_platform_external"),
     )
+
+
+class AggregatedStats(Base, TypesMixin):
+    post_data: Mapped[Dict[str, Any]] = mapped_column(type_=JSONB)
+    group_id: Mapped[int] = mapped_column(ForeignKey("social_entities_group.id", ondelete="CASCADE"))
+    group: Mapped['GroupModel'] = relationship(back_populates='aggregated_data')
 
 
 class BestPostInfoModel(Base, TypesMixin):
