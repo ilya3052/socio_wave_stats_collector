@@ -76,6 +76,10 @@ class VKStat(Stat):
         }
 
         self._posts_data = {}
+        self.max_like_count = 0
+        self.max_repost_count = 0
+        self.max_comment_count = 0
+        self.posts_stats = {}
 
     async def get_group(self):
         loop = asyncio.get_event_loop()
@@ -142,6 +146,12 @@ class VKStat(Stat):
                 comms_count = item.get("comments", {}).get('count', 0)
                 reposts_count = item.get("reposts", {}).get('count', 0)
                 views_count = item.get("views", {}).get('count', 0)
+
+                self.max_like_count = max(likes_count, self.max_like_count)
+                self.max_repost_count = max(reposts_count, self.max_repost_count)
+                self.max_comment_count = max(comms_count, self.max_comment_count)
+                self.posts_stats[item.get('id')] = {'likes': likes_count, 'comments': comms_count,
+                                                    'reposts': reposts_count}
 
                 media = item.get('attachments')
                 has_video = False
@@ -268,4 +278,11 @@ class VKStat(Stat):
         return True
 
     async def get_service_data(self):
-        return self._posts_count
+        return {
+            'posts_count': self._posts_count,
+            'max_likes': self.max_like_count,
+            'max_comments': self.max_comment_count,
+            'max_reposts': self.max_repost_count,
+            'posts_stats': self.posts_stats,
+        }
+        # return self._posts_count, self.m
