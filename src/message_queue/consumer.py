@@ -1,4 +1,5 @@
 import json
+import logging
 
 from aio_pika.abc import AbstractIncomingMessage
 
@@ -9,6 +10,7 @@ from src.models import GroupModel
 from src.repositories import GroupsRepository
 from src.stats import collect_stats, send_absolute_stats_to_db
 
+logger = logging.getLogger(__name__)
 
 def get_api(platform):
     api = None
@@ -26,6 +28,9 @@ async def process_message(message: AbstractIncomingMessage):
         with Session() as session:
             group_repo = GroupsRepository(session)
             group: GroupModel = group_repo.get(group_data.get('group_id'))
+            if group.status in ('COLLECTING', 'SUCCESS'):
+                logger.info(f'Статистика для группы {group.name} (ID {group.id}) уже собрана, пропускаем')
+                return
             group.status = 'COLLECTING'
             session.commit()
             platform = Platforms(group.platform.alias)
