@@ -1,8 +1,9 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Dict, Any
 
 from sqlalchemy import String, text, ForeignKey, UniqueConstraint, BigInteger
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from src.core import SnapshotType, BestPostInfoType
@@ -61,6 +62,7 @@ class GroupModel(Base, TypesMixin):
     )
     platform_id: Mapped[int] = mapped_column(ForeignKey("social_entities_platform.id", ondelete="CASCADE"))
     platform: Mapped['PlatformModel'] = relationship(back_populates='groups')
+    aggregated_post_data: Mapped[Dict[str, Any]] = mapped_column(type_=JSONB)
 
     stats: Mapped['AbsoluteStatsModel'] = relationship(
         back_populates='group'

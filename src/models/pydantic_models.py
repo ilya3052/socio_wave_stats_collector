@@ -36,6 +36,8 @@ class GroupSchema(ParentSchemaConfig):
         default=date.today()
     )
 
+    post_data: dict = Field(alias="predictive_models_params", description="Параметры модели в формате JSON")
+
     service_account_id: int = Field(description="Внешний ключ для связи с сервисным аккаунтом")
     platform_id: int = Field(description="Внешний ключ для связи с записью платформы")
 

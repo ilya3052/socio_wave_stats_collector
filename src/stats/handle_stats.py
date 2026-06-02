@@ -19,10 +19,6 @@ async def handle_stats(stats, stats_type):
                 if not await send_stats_to_db(stats, stats_type):
                     logger.error(f"send_stats_to_db вернула False для группы {stats.get('Internal ID')}")
                     return False
-            case Type.ABSOLUTE:
-                if not await send_absolute_stats_to_db(stats):
-                    logger.error(f"send_absolute_stats_to_db вернула False для группы {stats.get('Internal ID')}")
-                    return False
             case Type.TOP:
                 if not await send_top_posts_stats_to_db(stats):
                     logger.error(f"send_top_posts_stats_to_db вернула False для группы {stats.get('Internal ID')}")
