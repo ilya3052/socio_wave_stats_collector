@@ -10,6 +10,7 @@ from src.models import AbsoluteStatsSchema, SnapshotSchemaCreate, SnapshotModel,
     PostMetricsSchemaCreate, PostMetricsModel
 from src.repositories import AbsoluteStatsRepository, SnapshotRepository, SnapshotStatsRepository, \
     BestPostsInfoRepository, GroupsRepository, PostMetricsRepository
+from src.tools import get_aggregated_post_data
 
 logger = logging.getLogger(__name__)
 
@@ -114,6 +115,14 @@ async def send_stats_to_db(stats, snapshot_type):
 
 
 async def send_absolute_stats_to_db(stats):
+    service_data = stats.get('service_data')
+    posts_stats = service_data.get('posts_stats')
+    max_likes = service_data.get('max_likes')
+    max_reposts = service_data.get('max_reposts')
+    max_comments = service_data.get('max_comments')
+
+    aggregated_data = get_aggregated_post_data(posts_stats, max_likes, max_reposts, max_comments)
+
     try:
         with Session() as session:
             group_id = stats.get('Internal ID')
@@ -122,6 +131,7 @@ async def send_absolute_stats_to_db(stats):
             group_repo = GroupsRepository(session)
             group = group_repo.get(group_id)
             group.status = 'SUCCESS'
+            group.aggregated_post_data = aggregated_data
 
             absolute_stats_repo = AbsoluteStatsRepository(session)
             absolute_stats_instance = absolute_stats_repo.get_by_group(group_id)
