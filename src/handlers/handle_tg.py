@@ -26,14 +26,15 @@ async def handle_tg_group(api, group, **options):
         raise GroupHandleError(f'Произошла ошибка при обработке группы {group.name} на платформе TG') from e
     now = datetime.now()
 
-    posts_count = await stat.get_service_data()
+    service_data = await stat.get_service_data()
 
     logger.info(
-        f"TG группа '{group.name}' обработана за {(now - start).total_seconds():.2f} сек. Обработано записей: {posts_count}",
+        f"TG группа '{group.name}' обработана за {(now - start).total_seconds():.2f} сек. Обработано записей: {service_data.get('posts_count')}",
     )
 
     data: Dict[str, str | int] = await stat.get_data()
     if not data:
         raise ValueError(f'Произошла ошибка при получении данных для группы {group.name} на платформе TG')
     data['Internal ID'] = group.id
+    data['service_data'] = service_data
     return data
