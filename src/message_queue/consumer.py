@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 
@@ -26,19 +27,30 @@ async def process_message(message: AbstractIncomingMessage):
     async with message.process():
         body = message.body
         group_data = json.loads(body)
-        with Session() as session:
-            group_repo = GroupsRepository(session)
-            group: GroupModel = group_repo.get(group_data.get('group_id'))
-            if group.status in ('COLLECTING', 'SUCCESS'):
-                logger.info(f'Статистика для группы {group.name} (ID {group.id}) уже собрана, пропускаем')
-                return
-            group.status = 'COLLECTING'
-            session.commit()
-            platform = Platforms(group.platform.alias)
+
+        group, platform = await asyncio.to_thread(
+            _process_group_db, group_data.get('group_id'),
+        )
+        if group is None:
+            return
+
         api = get_api(platform)
         stats = await collect_stats(api=api, groups=[group], platform=platform, **{'Type': Type.ABSOLUTE})
         await send_absolute_stats_to_db(stats[0])
+        print(f'Группа {group.name} (ID {group.external_id}) успешно обработана')
 
+
+def _process_group_db(group_id):
+    with Session() as session:
+        group_repo = GroupsRepository(session)
+        group: GroupModel = group_repo.get(group_id)
+        if group.status in ('COLLECTING', 'SUCCESS'):
+            logger.info(f'Статистика для группы {group.name} (ID {group.id}) уже собрана, пропускаем')
+            return None, None
+        group.status = 'COLLECTING'
+        session.commit()
+        platform = Platforms(group.platform.alias)
+    return group, platform
 
 async def start_consumer():
     channel = await get_channel()
