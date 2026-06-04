@@ -4,7 +4,7 @@ from datetime import timedelta, datetime, date
 from typing import Any, Dict, Optional, Set
 
 from telethon import TelegramClient
-from telethon.tl.functions.channels import GetFullChannelRequest
+from telethon.tl.functions.channels import GetFullChannelRequest, JoinChannelRequest
 from telethon.tl.types import Channel, InputChannel, ChatFull, Message, PeerChannel, MessageMediaPhoto, \
     MessageMediaDocument
 
@@ -29,7 +29,7 @@ async def get_item_stats(msg):
 
 
 class TGStat(Stat):
-    def __init__(self, api, group_id, **options):
+    def __init__(self, api, group_id, link, **options):
         self._options: Dict[str, Any] = options
         self._api: TelegramClient = api
         self._group_id = group_id
@@ -44,6 +44,8 @@ class TGStat(Stat):
         self._repost_count = 0
         self._views = 0
 
+        self._link = link
+
         self._screen_name = None
         self._name = None
 
@@ -51,6 +53,11 @@ class TGStat(Stat):
         self._posts_count = 0
 
         self._posts_data = {}
+
+        self.max_like_count = 0
+        self.max_repost_count = 0
+        self.max_comment_count = 0
+        self.posts_stats = {}
 
         self._top_posts = {
             "most_liked": {
@@ -72,8 +79,13 @@ class TGStat(Stat):
         }
 
     async def get_group(self):
-        self._channel = await self._api.get_entity(PeerChannel(self._group_id))
-        self._input_channel = InputChannel(self._channel.id, self._channel.access_hash)
+        try:
+            self._channel = await self._api.get_entity(PeerChannel(self._group_id))
+            self._input_channel = InputChannel(self._channel.id, self._channel.access_hash)
+        except ValueError:
+            await self._api(JoinChannelRequest(self._link))
+            self._channel = await self._api.get_entity(PeerChannel(self._group_id))
+            self._input_channel = InputChannel(self._channel.id, self._channel.access_hash)
         return True
 
     async def get_main_info(self):
@@ -150,6 +162,13 @@ class TGStat(Stat):
                 likes_count = item_stats[1]
                 comms_count = item_stats[2]
                 reposts_count = item_stats[3]
+
+                self.max_like_count = max(likes_count, self.max_like_count)
+                self.max_repost_count = max(reposts_count, self.max_repost_count)
+                self.max_comment_count = max(comms_count, self.max_comment_count)
+                self.posts_stats[item.id] = {'likes': likes_count, 'comments': comms_count,
+                                             'reposts': reposts_count}
+
                 has_photo = isinstance(item.media, MessageMediaPhoto)
                 has_video = isinstance(item.media, MessageMediaDocument) and item.media.video
 
@@ -239,7 +258,13 @@ class TGStat(Stat):
             }
 
     async def get_service_data(self):
-        return self._posts_count
+        return {
+            'posts_count': self._posts_count,
+            'max_likes': self.max_like_count,
+            'max_comments': self.max_comment_count,
+            'max_reposts': self.max_repost_count,
+            'posts_stats': self.posts_stats,
+        }
 
     async def get_data(self):
         if (_type := self._options.get('Type')) == Type.TOP:

@@ -4,7 +4,7 @@ from pydantic import ValidationError
 from sqlalchemy.exc import NoResultFound
 
 from src.core import Type
-from .send import send_stats_to_db, send_absolute_stats_to_db, send_top_posts_stats_to_db
+from .send import send_stats_to_db, send_top_posts_stats_to_db
 
 logger = logging.getLogger(__name__)
 

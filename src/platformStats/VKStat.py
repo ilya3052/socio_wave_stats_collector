@@ -208,7 +208,10 @@ class VKStat(Stat):
 
     async def _update_top_posts(self, item, likes_count, comments_count, reposts_count, views_count):
         content = item.get('text')
-        content = content[:147] + '...' if len(content) > 150 else content
+        if not content:
+            content = 'В записи отсутствует текст'
+        else:
+            content = content[:147] + '...' if len(content) > 150 else content
         if likes_count >= self._top_posts.get('most_liked').get('likes_count'):
             self._top_posts['most_liked'] = {
                 "id": item.get('id'),
@@ -285,4 +288,3 @@ class VKStat(Stat):
             'max_reposts': self.max_repost_count,
             'posts_stats': self.posts_stats,
         }
-        # return self._posts_count, self.m
