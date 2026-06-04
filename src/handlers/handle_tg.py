@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 async def handle_tg_group(api, group, **options):
-    stat = TGStat(api=api, group_id=group.external_id, **options)
+    stat = TGStat(api=api, group_id=group.external_id, link=group.link, **options)
 
     start = datetime.now()
     try:

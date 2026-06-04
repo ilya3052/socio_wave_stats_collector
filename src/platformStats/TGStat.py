@@ -4,7 +4,7 @@ from datetime import timedelta, datetime, date
 from typing import Any, Dict, Optional, Set
 
 from telethon import TelegramClient
-from telethon.tl.functions.channels import GetFullChannelRequest
+from telethon.tl.functions.channels import GetFullChannelRequest, JoinChannelRequest
 from telethon.tl.types import Channel, InputChannel, ChatFull, Message, PeerChannel, MessageMediaPhoto, \
     MessageMediaDocument
 
@@ -29,7 +29,7 @@ async def get_item_stats(msg):
 
 
 class TGStat(Stat):
-    def __init__(self, api, group_id, **options):
+    def __init__(self, api, group_id, link, **options):
         self._options: Dict[str, Any] = options
         self._api: TelegramClient = api
         self._group_id = group_id
@@ -43,6 +43,8 @@ class TGStat(Stat):
         self._comments_count = 0
         self._repost_count = 0
         self._views = 0
+
+        self._link = link
 
         self._screen_name = None
         self._name = None
@@ -77,8 +79,13 @@ class TGStat(Stat):
         }
 
     async def get_group(self):
-        self._channel = await self._api.get_entity(PeerChannel(self._group_id))
-        self._input_channel = InputChannel(self._channel.id, self._channel.access_hash)
+        try:
+            self._channel = await self._api.get_entity(PeerChannel(self._group_id))
+            self._input_channel = InputChannel(self._channel.id, self._channel.access_hash)
+        except ValueError:
+            await self._api(JoinChannelRequest(self._link))
+            self._channel = await self._api.get_entity(PeerChannel(self._group_id))
+            self._input_channel = InputChannel(self._channel.id, self._channel.access_hash)
         return True
 
     async def get_main_info(self):
