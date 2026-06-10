@@ -17,7 +17,7 @@ def get_log_file(log_type: str = 'system') -> str:
         filename = f'tg_{today}.log'
     else:
         base_dir = 'logs/system'
-        filename = f'system_{today}.log'
+        filename = f'auto_collection_{today}.log'
 
     os.makedirs(base_dir, exist_ok=True)
     return os.path.join(base_dir, filename)
@@ -84,7 +84,7 @@ LOGGING_CONFIG = {
 }
 
 
-def configure_logging(log_type: str = 'system'):
+def configure_logging(log_type: str = 'auto_collection'):
     log_file = get_log_file(log_type)
     os.makedirs(os.path.dirname(log_file) or '.', exist_ok=True)
 
