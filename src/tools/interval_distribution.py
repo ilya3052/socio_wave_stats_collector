@@ -58,3 +58,31 @@ def _count_numbers_in_intervals(intervals, post_data):
 
     return {interval[1]: {"count": out_posts_data[i][0], "post_id": out_posts_data[i][1]} for i, interval in
             enumerate(intervals)}
+
+
+def update_intervals(additional_data, post_data):
+    likes_data = post_data['aggregated_likes_counts']
+    comms_data = post_data['aggregated_comments_counts']
+    repost_data = post_data['aggregated_reposts_counts']
+
+    likes_items = [(int(k), k) for k in likes_data]
+    comms_items = [(int(k), k) for k in comms_data]
+    repost_items = [(int(k), k) for k in repost_data]
+
+    for post in additional_data.values():
+        likes = post.get('likes_count', 0)
+        comms = post.get('comms_count', 0)
+        reposts = post.get('repost_count', 0)
+
+        for int_k, k in likes_items:
+            if likes < int_k:
+                likes_data[k] += 1
+
+        for int_k, k in comms_items:
+            if comms < int_k:
+                comms_data[k] += 1
+
+        for int_k, k in repost_items:
+            if reposts < int_k:
+                repost_data[k] += 1
+
