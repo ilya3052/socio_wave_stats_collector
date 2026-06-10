@@ -11,6 +11,7 @@ from src.models import AbsoluteStatsSchema, SnapshotSchemaCreate, SnapshotModel,
 from src.repositories import AbsoluteStatsRepository, SnapshotRepository, SnapshotStatsRepository, \
     BestPostsInfoRepository, GroupsRepository, PostMetricsRepository
 from src.tools import get_aggregated_post_data
+from src.tools.interval_distribution import update_intervals
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,10 @@ async def send_stats_to_db(stats, snapshot_type):
     try:
         with Session() as session:
             group_id = stats.get('Internal ID')
+
+            group_repo = GroupsRepository(session)
+            group_instance = group_repo.get(group_id)
+            aggregated_post_data = group_instance.aggregated_post_data
 
             logger.debug(f"Сохранение {snapshot_type.value} статистики для группы с ID {group_id}")
 
@@ -74,13 +79,20 @@ async def send_stats_to_db(stats, snapshot_type):
 
             metrics_repo = PostMetricsRepository(session)
             additional_data = stats.get('additional_data')
+            post_data = update_intervals(additional_data, aggregated_post_data)
+            group_instance.aggregated_post_data = post_data
+
             for data in additional_data:
                 post = additional_data[data]
+                likes_count = post.get('likes_count', 0)
+                comms_count = post.get('comms_count', 0)
+                repost_count = post.get('repost_count', 0)
+
                 metrics_schema = PostMetricsSchemaCreate.model_validate({
                     'post_id': data,
-                    'likes_count': post.get('likes_count'),
-                    'comms_count': post.get('comms_count'),
-                    'reposts_count': post.get('reposts_count'),
+                    'likes_count': likes_count,
+                    'comms_count': comms_count,
+                    'reposts_count': repost_count,
                     'views_count': post.get('views_count'),
                     'hour': post.get('hour'),
                     'day_of_week': post.get('day_of_week'),
