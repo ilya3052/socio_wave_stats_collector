@@ -1,6 +1,8 @@
 import math
 import random
 
+from icecream import ic
+
 
 def get_aggregated_post_data(posts_stats, max_likes, max_reposts, max_comments):
     aggregated_reposts_counts = {}
@@ -40,7 +42,7 @@ def _split_into_intervals(number):
 
 
 def _count_numbers_in_intervals(intervals, post_data):
-    out_posts_data = [[0, 0] for _ in range(len(intervals))]
+    out_posts_data = [[0, []] for _ in range(len(intervals))]
     numbers = sorted(post_data, key=lambda x: x[0])
     posts_per_interval = [[] for _ in range(len(intervals))]
 
@@ -54,9 +56,10 @@ def _count_numbers_in_intervals(intervals, post_data):
 
     for i in range(len(intervals)):
         if posts_per_interval[i]:
-            out_posts_data[i][1] = random.choice(posts_per_interval[i])
+            sample_size = out_posts_data[i][0] if out_posts_data[i][0] < 20 else 20
+            out_posts_data[i][1] = random.sample(posts_per_interval[i], sample_size)
 
-    return {interval[1]: {"count": out_posts_data[i][0], "post_id": out_posts_data[i][1]} for i, interval in
+    return {interval[1]: {"count": out_posts_data[i][0], "post_ids": out_posts_data[i][1]} for i, interval in
             enumerate(intervals)}
 
 
@@ -76,14 +79,21 @@ def update_intervals(additional_data, post_data):
 
         for int_k, k in likes_items:
             if likes < int_k:
-                likes_data[k]['count'] += 1
+                continue
+            likes_data[k]['count'] += 1
+            break
+
 
         for int_k, k in comms_items:
             if comms < int_k:
-                comms_data[k]['count'] += 1
+                continue
+            comms_data[k]['count'] += 1
+            break
 
         for int_k, k in repost_items:
             if reposts < int_k:
-                repost_data[k]['count'] += 1
+                continue
+            repost_data[k]['count'] += 1
+            break
 
     return post_data
