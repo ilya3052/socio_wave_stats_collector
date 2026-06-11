@@ -76,13 +76,14 @@ def update_intervals(additional_data, post_data):
 
         for int_k, k in likes_items:
             if likes < int_k:
-                likes_data[k] += 1
+                likes_data[k]['count'] += 1
 
         for int_k, k in comms_items:
             if comms < int_k:
-                comms_data[k] += 1
+                comms_data[k]['count'] += 1
 
         for int_k, k in repost_items:
             if reposts < int_k:
-                repost_data[k] += 1
+                repost_data[k]['count'] += 1
 
+    return post_data
