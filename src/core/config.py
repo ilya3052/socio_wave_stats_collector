@@ -14,7 +14,7 @@ API_HASH = os.getenv("API_HASH")
 
 KEY = os.getenv('ENCRYPTION_KEY')
 
-RABBITMQ_URL = os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost/")
+RABBITMQ_URL = os.getenv("RABBITMQ_URL")
 
 SPECIAL_VK_ACC_SERVICE_KEY = os.getenv("SPECIAL_VK_ACC_SERVICE_KEY")
 SPECIAL_TG_ACC_SESSION_PATH = os.getenv("SPECIAL_TG_ACC_SESSION_PATH")
@@ -94,9 +94,6 @@ async def get_channel() -> aio_pika.abc.AbstractChannel:
                 _channel = None
                 _connection = None
                 return await get_channel()
-
-            await _channel.declare_queue("abs-stats", durable=True)
-
     return _channel
 
 
