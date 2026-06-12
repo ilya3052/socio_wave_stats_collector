@@ -7,6 +7,7 @@ from aio_pika.abc import AbstractIncomingMessage
 from src.api.apiTG import get_tg_api_session
 from src.api.apiVK import get_vk_api_session
 from src.core import Session, get_channel, Platforms, SPECIAL_VK_ACC_SERVICE_KEY, SPECIAL_TG_ACC_SESSION_PATH, Type
+from src.message_queue.producer import publish_task
 from src.models import GroupModel
 from src.repositories import GroupsRepository
 from src.stats import collect_stats, send_absolute_stats_to_db
@@ -37,6 +38,14 @@ async def process_message(message: AbstractIncomingMessage):
         api = get_api(platform)
         stats = await collect_stats(api=api, groups=[group], platform=platform, **{'Type': Type.ABSOLUTE})
         await send_absolute_stats_to_db(stats[0])
+        publish_data = {
+            'user_id': group_data.get('tg_id'),
+            'group_name': group.name,
+            'platform': group.platform.name,
+            'link': group.link,
+            'slug': group.slug
+        }
+        await publish_task(json.dumps(publish_data), 'group-data-collecting-finished')
         print(f'Группа {group.name} (ID {group.external_id}) успешно обработана')
 
 
