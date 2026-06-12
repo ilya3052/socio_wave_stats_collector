@@ -1,6 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Annotated, Optional, Dict, Any
+from typing import Annotated, Optional, Dict, Any, List
 
 from sqlalchemy import String, text, ForeignKey, UniqueConstraint, BigInteger
 from sqlalchemy.dialects.postgresql import JSONB
@@ -48,6 +48,25 @@ class TypesMixin:
     }
 
 
+class UsersModel(Base, TypesMixin):
+    __tablename__ = "users_customuser"
+    email: Mapped[str_128]
+    is_email_confirmed: Mapped[bool]
+
+
+class GroupUsersModel(Base):
+    __tablename__ = "social_entities_group_users"
+    group_id: Mapped[int] = mapped_column(
+        ForeignKey("social_entities_group.id", ondelete="CASCADE")
+    )
+    customuser_id: Mapped[int] = mapped_column(
+        ForeignKey("users_customuser.id", ondelete="CASCADE")
+    )
+    __table_args__ = (
+        UniqueConstraint("group_id", "customuser_id", name="uq_group_user"),
+    )
+
+
 class GroupModel(Base, TypesMixin):
     __tablename__ = "social_entities_group"
     external_id: Mapped[int] = mapped_column(BigInteger, index=True)
@@ -55,6 +74,8 @@ class GroupModel(Base, TypesMixin):
     link: Mapped[str_256]
     added_at: Mapped[created_at]
     status: Mapped[str_128]
+    slug: Mapped[str_128]
+
     service_account_id: Mapped[int] = mapped_column(
         ForeignKey("service_accounts_serviceaccount.id", ondelete='SET NULL'))
     service_account: Mapped['ServiceAccountModel'] = relationship(
@@ -74,6 +95,11 @@ class GroupModel(Base, TypesMixin):
 
     post_metrics: Mapped['PostMetricsModel'] = relationship(
         back_populates='group'
+    )
+
+    users: Mapped[List['UsersModel']] = relationship(
+        secondary='social_entities_group_users',
+        viewonly=True,
     )
 
     __table_args__ = (

@@ -1,16 +1,21 @@
+import asyncio
 import logging
+import socket
 from datetime import datetime
 
+from icecream import ic
 from pydantic import ValidationError
 from sqlalchemy.exc import NoResultFound
 
 from src.core import Session
+from src.core.smtp import send_email
 from src.models import AbsoluteStatsSchema, SnapshotSchemaCreate, SnapshotModel, SnapshotStatsSchemaCreate, \
     SnapshotStatsModel, AbsoluteStatsModel, BestPostInfoSchemaCreate, BestPostInfoModel, GroupModel, \
     PostMetricsSchemaCreate, PostMetricsModel
 from src.repositories import AbsoluteStatsRepository, SnapshotRepository, SnapshotStatsRepository, \
     BestPostsInfoRepository, GroupsRepository, PostMetricsRepository
 from src.tools import get_aggregated_post_data
+from src.tools.email_tools import create_email_from_template
 from src.tools.interval_distribution import update_intervals
 
 logger = logging.getLogger(__name__)
@@ -176,14 +181,19 @@ async def send_top_posts_stats_to_db(stats):
         with Session() as session:
             group_id = stats.get('External ID')
             top_posts = stats.get('top_posts')
+            if not top_posts or all(
+                post.get('id') == 0 for post in top_posts.values()
+            ):
+                logger.warning("Нет постов за неделю для группы %s", group_id)
+                raise ValueError(f"Нет постов за неделю для группы {group_id}")
 
             groups_repo = GroupsRepository(session)
             group: GroupModel = groups_repo.get_by_external_id(group_id)
+            email_list = [user.email for user in group.users if user.is_email_confirmed]
             internal_id = group.id
 
             best_posts_repo = BestPostsInfoRepository(session)
             best_posts = best_posts_repo.get_by_group_id(internal_id)
-
             if best_posts:
                 for item, instance in zip(top_posts, best_posts):  # type: str, BestPostInfoModel
                     processed_item = top_posts[item]
@@ -198,6 +208,14 @@ async def send_top_posts_stats_to_db(stats):
                         "group_id": internal_id,
                         "last_updated_at": datetime.now()
                     })
+                email_body = create_email_from_template(
+                    top_posts,
+                    group_name=group.name,
+                    group_link=group.link,
+                    platform_alias=group.platform.alias,
+                    external_id=group_id,
+                )
+                await asyncio.to_thread(send_email, email_list, 'Статистика лучших постов за неделю', email_body)
                 session.commit()
                 return True
 

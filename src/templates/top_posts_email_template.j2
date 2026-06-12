@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лучшие посты за неделю — {{ group_name }}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .email-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            box-sizing: border-box;
+        }
+        .main-card {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 32px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .main-title {
+            font-size: 24px;
+            color: #333333;
+            margin: 0 0 4px 0;
+            font-weight: 700;
+        }
+        .group-subtitle {
+            font-size: 16px;
+            color: #6c757d;
+            margin: 0 0 16px 0;
+            font-weight: 400;
+        }
+        .intro-text {
+            font-size: 14px;
+            color: #495057;
+            margin: 0 0 24px 0;
+            line-height: 1.5;
+        }
+        .posts-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+        }
+        .posts-table td {
+            padding: 12px;
+            vertical-align: stretch;
+            width: 50%;
+        }
+        .post-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            width: 100%;
+            box-sizing: border-box;
+            height: 100%;
+        }
+        .post-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+            text-align: center;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .post-text {
+            color: #212529;
+            font-size: 15px;
+            line-height: 1.5;
+            word-break: break-word;
+            padding: 8px 0;
+        }
+        .post-link {
+            display: inline-block;
+            color: #ffffff;
+            background-color: #2c5aa0;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
+        .post-metrics {
+            font-size: 13px;
+            color: #6c757d;
+            padding-top: 8px;
+            white-space: nowrap;
+        }
+        .metric-sep {
+            color: #adb5bd;
+            margin: 0 4px;
+        }
+        .updated-info {
+            text-align: right;
+            color: #adb5bd;
+            font-size: 14px;
+            margin-top: 16px;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-wrapper">
+        <div class="main-card">
+            <h1 class="main-title">Лучшие посты за неделю</h1>
+            <h2 class="group-subtitle">{{ group_name }}</h2>
+            <p class="intro-text">
+                Подборка лучших публикаций сообщества за прошедшую неделю
+                по количеству просмотров, лайков, комментариев и репостов.
+            </p>
+
+            {% set labels = {
+                'most_viewed': 'Больше всего просмотров',
+                'most_liked': 'Больше всего лайков',
+                'most_commented': 'Больше всего комментариев',
+                'most_reposted': 'Больше всего репостов'
+            } %}
+
+            {% set order = ['most_viewed', 'most_liked', 'most_commented', 'most_reposted'] %}
+
+            {% macro post_card(label, content, likes_count, comms_count, reposts_count, views_count, link=none) %}
+            <div class="post-card">
+                <div class="post-label">{{ label }}</div>
+                <div class="post-text">{{ content }}</div>
+                {% if link %}
+                <a class="post-link" href="{{ link }}" target="_blank">Открыть пост →</a>
+                {% endif %}
+                <div class="post-metrics">
+                    <span>❤ {{ likes_count }}</span>
+                    <span class="metric-sep">|</span>
+                    <span>👁 {{ views_count }}</span>
+                    <span class="metric-sep">|</span>
+                    <span>💬 {{ comms_count }}</span>
+                    <span class="metric-sep">|</span>
+                    <span>🔄 {{ reposts_count }}</span>
+                </div>
+            </div>
+            {% endmacro %}
+
+            <table class="posts-table" cellpadding="0" cellspacing="0">
+                {% for row in order | batch(2) %}
+                <tr>
+                    {% for key in row %}
+                    {% set post = data[key] %}
+                    {% if platform_alias == 'TG' %}
+                        {% set post_link = group_link ~ '/' ~ post.id %}
+                    {% else %}
+                        {% set post_link = group_link ~ '/?w=wall-' ~ external_id ~ '_' ~ post.id %}
+                    {% endif %}
+                    <td>
+                        {{ post_card(labels[key], post.content, post.likes_count, post.comms_count, post.reposts_count, post.views_count, link=post_link) }}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+
+            <p class="updated-info">Обновлено: {{ updated_at }}</p>
+        </div>
+    </div>
+</body>
+</html>

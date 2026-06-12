@@ -35,6 +35,9 @@ class GroupSchema(ParentSchemaConfig):
         le=date.today(),
         default=date.today()
     )
+    slug: str = Field(
+        alias="group_slug",
+    )
 
     post_data: dict = Field(alias="predictive_models_params", description="Параметры модели в формате JSON")
 
