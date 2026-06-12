@@ -15,7 +15,11 @@ class GroupsRepository(BaseRepository[GroupModel]):
         return self.session.scalars(select(self.model).filter_by(platform_id=platform_id)).all()
 
     def get_by_external_id(self, external_id):
-        return self.session.scalars(select(self.model).filter_by(external_id=external_id)).one_or_none()
+        return (self.session.scalars(
+            select(self.model)
+            .options(selectinload(GroupModel.users))
+            .filter_by(external_id=external_id))
+                .one_or_none())
 
 
 class PostMetricsRepository(BaseRepository[PostMetricsModel]):
