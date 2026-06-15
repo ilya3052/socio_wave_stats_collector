@@ -174,34 +174,32 @@ class TGStat(Stat):
 
                 self._posts_count += 1
 
-                if self._options.get('Type') == Type.DAILY:
-                    date = item.date
-                    if item.date.tzinfo is not None:
-                        date = item.date.replace(tzinfo=None) + timedelta(hours=3)
-                    hour = date.hour
-                    day_of_week = date.weekday()
+                date = item.date
+                if item.date.tzinfo is not None:
+                    date = item.date.replace(tzinfo=None) + timedelta(hours=3)
+                hour = date.hour
+                day_of_week = date.weekday()
 
-                    text = item.message
-                    text = re.sub(r'(\d)\s+(\d)', r'\1-\2', text)
-                    text_clean = re.sub(r'[^\w\s-]', '', text)
-                    self._posts_data[str(item.id)] = {
-                        "likes_count": likes_count,
-                        "comms_count": comms_count,
-                        "reposts_count": reposts_count,
-                        "views_count": views_count,
-                        "hour": hour,
-                        "day_of_week": day_of_week,
-                        "is_weekend": day_of_week >= 5,
-                        "has_text": bool(getattr(item, 'text', None)),
-                        "has_media": bool(item.media),
-                        "text_length": len(item.message),
+                text = item.message
+                text = re.sub(r'(\d)\s+(\d)', r'\1-\2', text)
+                text_clean = re.sub(r'[^\w\s-]', '', text)
+                self._posts_data[str(item.id)] = {
+                    "likes_count": likes_count,
+                    "comms_count": comms_count,
+                    "reposts_count": reposts_count,
+                    "views_count": views_count,
+                    "hour": hour,
+                    "day_of_week": day_of_week,
+                    "is_weekend": day_of_week >= 5,
+                    "has_text": bool(getattr(item, 'text', None)),
+                    "has_media": bool(item.media),
+                    "text_length": len(item.message),
 
-                        "like_view_ratio": likes_count / views_count,
-                        "has_video": has_video,
-                        "has_photo": has_photo,
-                        # "media_count": len(media),
-                        "word_count": len(text_clean.split())
-                    }
+                    "like_view_ratio": likes_count / views_count,
+                    "has_video": has_video,
+                    "has_photo": has_photo,
+                    "word_count": len(text_clean.split())
+                }
 
                 if (_type := self._options.get('Type')) == Type.TOP:
                     await self._update_top_posts(item, likes_count, comms_count, reposts_count, views_count)
@@ -284,10 +282,9 @@ class TGStat(Stat):
             "Репосты": self._repost_count,
             "Просмотры": self._views,
             "Количество записей": self._posts_count,
-            "screen_name": self._screen_name
+            "screen_name": self._screen_name,
+            'additional_data': self._posts_data
         }
-        if _type == Type.DAILY:
-            data['additional_data'] = self._posts_data
 
         return data
 

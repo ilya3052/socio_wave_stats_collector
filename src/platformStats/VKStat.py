@@ -164,30 +164,29 @@ class VKStat(Stat):
                         has_video = True
                         continue
 
-                if self._options.get('Type') == Type.DAILY:
-                    date = item.get('date')
-                    hour = datetime.fromtimestamp(date).hour
-                    day_of_week = datetime.fromtimestamp(date).weekday()
+                date = item.get('date')
+                hour = datetime.fromtimestamp(date).hour
+                day_of_week = datetime.fromtimestamp(date).weekday()
 
-                    text = item.get('text')
-                    text = re.sub(r'(\d)\s+(\d)', r'\1-\2', text)
-                    text_clean = re.sub(r'[^\w\s-]', '', text)
+                text = item.get('text')
+                text = re.sub(r'(\d)\s+(\d)', r'\1-\2', text)
+                text_clean = re.sub(r'[^\w\s-]', '', text)
 
-                    self._posts_data[str(item.get('id'))] = {
-                        "likes_count": likes_count,
-                        "comms_count": comms_count,
-                        "reposts_count": reposts_count,
-                        "views_count": views_count,
-                        "hour": hour,
-                        "day_of_week": day_of_week,
-                        "is_weekend": day_of_week >= 5,
-                        "text_length": len(text),
+                self._posts_data[str(item.get('id'))] = {
+                    "likes_count": likes_count,
+                    "comms_count": comms_count,
+                    "reposts_count": reposts_count,
+                    "views_count": views_count,
+                    "hour": hour,
+                    "day_of_week": day_of_week,
+                    "is_weekend": day_of_week >= 5,
+                    "text_length": len(text),
 
-                        "like_view_ratio": likes_count / views_count,
-                        "has_video": has_video,
-                        "has_photo": has_photo,
-                        "word_count": len(text_clean.split())
-                    }
+                    "like_view_ratio": likes_count / views_count if views_count > 0 else 0,
+                    "has_video": has_video,
+                    "has_photo": has_photo,
+                    "word_count": len(text_clean.split())
+                }
 
                 if (_type := self._options.get('Type')) == Type.TOP:
                     await self._update_top_posts(item, likes_count, comms_count, reposts_count, views_count)
@@ -264,10 +263,9 @@ class VKStat(Stat):
             "Репосты": self._repost_count,
             "Просмотры": self._views,
             "Количество записей": self._posts_count,
-            "screen_name": self._screen_name
+            "screen_name": self._screen_name,
+            'additional_data': self._posts_data,
         }
-        if _type == Type.DAILY:
-            data['additional_data'] = self._posts_data
 
         return data
 
