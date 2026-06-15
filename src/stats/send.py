@@ -162,6 +162,42 @@ async def send_absolute_stats_to_db(stats):
                 "last_updated_at": datetime.now(),
                 "group_id": group_id
             })
+            metrics_repo = PostMetricsRepository(session)
+            additional_data = stats.get('additional_data')
+            posts_count = service_data.get('posts_count')
+            if posts_count > 500:
+                posts_count = 500
+            keys = list(additional_data.keys()).copy()
+            keys.sort(key=int, reverse=True)
+            for idx, data in enumerate(keys):
+                if idx >= posts_count:
+                    break
+                post = additional_data[data]
+                likes_count = post.get('likes_count', 0)
+                comms_count = post.get('comms_count', 0)
+                repost_count = post.get('reposts_count', 0)
+
+                metrics_schema = PostMetricsSchemaCreate.model_validate({
+                    'post_id': data,
+                    'likes_count': likes_count,
+                    'comms_count': comms_count,
+                    'reposts_count': repost_count,
+                    'views_count': post.get('views_count'),
+                    'hour': post.get('hour'),
+                    'day_of_week': post.get('day_of_week'),
+                    'is_weekend': post.get('is_weekend'),
+                    'text_length': post.get('text_length'),
+                    'group_id': group_id,
+                    "timestamp": datetime.now(),
+
+                    "like_view_ratio": post.get("like_view_ratio"),
+                    "has_video": post.get("has_video"),
+                    "has_photo": post.get("has_photo"),
+                    "word_count": post.get('word_count')
+                })
+                metrics_instance = PostMetricsModel(**metrics_schema.model_dump())
+                metrics_repo.add(metrics_instance)
+
             session.commit()
 
         logger.info(f"Абсолютная статистика успешно сохранена в БД для группы с ID {stats.get('Internal ID')}")
