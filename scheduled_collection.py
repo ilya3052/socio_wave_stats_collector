@@ -12,7 +12,6 @@ from src.exceptions import GroupsNotFoundError, GroupHandleError, SendingError
 from src.logger import configure_logging
 from src.repositories import ServiceAccountRepository
 from src.tasks import run_processing_tasks, run_sending_tasks
-from src.tools import create_basic_elem
 
 logger = logging.getLogger(__name__)
 
@@ -61,22 +60,15 @@ def scheduled_collection():
     --top                   Обновление недельного топа постов
     --daily                 Сбор статистики за последние сутки
     --hourly                Сбор статистики за последние два часа
-    -ct --create-tables     Создание таблиц в базе
     -h --help               Показать эту подсказку
 ПРИМЕРЫ
     main.py vk --daily
-    main.py --create-tables
     """
     try:
         if len(sys.argv) == 1 or sys.argv[1].lstrip('-') in ('h', 'help'):
             print(scheduled_collection.__doc__)
             sys.exit(0)
 
-        if sys.argv[1].lstrip('-') in ('create-tables', 'ct'):
-            configure_logging()
-            logger.info("Запущено создание/пересоздание таблиц в базе данных")
-            asyncio.run(create_basic_elem())
-            logger.info("Таблицы успешно созданы")
         else:
             configure_logging(sys.argv[1].lstrip('-'))
             asyncio.run(start_collecting_statistics(sys.argv[1], sys.argv[2].lstrip('-')))
